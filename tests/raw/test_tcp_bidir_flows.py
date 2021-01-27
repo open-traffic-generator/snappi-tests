@@ -1,71 +1,35 @@
-import pytest
+import json
 
 
-@pytest.mark.sanity
-def test_tcp_bidir_flows(api, tx_addr, rx_addr, utils):
+def test_tcp_bidir_flows(api, utils):
     """
-    Configure a raw TCP bi-directional flows with,
+    Configure raw TCP bi-directional flows, each with,
     - list of 6 src ports and 3 dst ports
     - 100 frames of 1518B size each
     - 10% line rate
     Validate,
     - tx/rx frame count and bytes are as expected
     """
-    size = 128
-    packets = 1000
     config = api.config()
+    # load JSON config from configs/
+    with open(utils.get_test_config_path('tcp_bidir_flows.json')) as f:
+        config_dict = json.load(f)
+        config.deserialize(config_dict['config'])
 
-    tx, rx = (
-        config.ports
-        .port(name='tx', location=tx_addr)
-        .port(name='rx', location=rx_addr)
-    )
+    # update port locations
+    config.ports[0].location = utils.settings.ports[0]
+    config.ports[1].location = utils.settings.ports[1]
+    # this will allow us to take over ports that may already be in use
+    config.options.port_options.location_preemption = True
 
-    l1 = config.layer1.layer1()[0]
-    l1.name = 'l1 settings'
-    l1.port_names = [rx.name, tx.name]
-    l1.media = utils.settings.media
-
-    # flow1
-    flows = config.flows.flow(name='tcp_flow1').flow(name='tcp_flow2')
-    flow1 = flows[0]
-    flow1.tx_rx.port.tx_name = tx.name
-    flow1.tx_rx.port.rx_name = rx.name
-    flow1.size.fixed = 128
-    flow1.duration.fixed_packets.packets = 1000
-
-    eth, ip, tcp = flow1.packet.ethernet().ipv4().tcp()
-
-    eth.src.value = '00:CD:DC:CD:DC:CD'
-    eth.dst.value = '00:AB:BC:AB:BC:AB'
-
-    ip.src.value = '1.1.1.2'
-    ip.dst.value = '1.1.1.1'
-
-    tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
-    tcp.dst_port.values = ['6000', '6015', '6050']
-
-    # flow2
-    flow2 = flows[1]
-    flow2.tx_rx.port.tx_name = rx.name
-    flow2.tx_rx.port.rx_name = tx.name
-    flow2.size.fixed = 128
-    flow2.duration.fixed_packets.packets = 1000
-
-    eth, ip, tcp = flow2.packet.ethernet().ipv4().tcp()
-
-    eth.src.value = '00:AB:BC:AB:BC:AB'
-    eth.dst.value = '00:CD:DC:CD:DC:CD'
-
-    ip.src.value = '1.1.1.1'
-    ip.dst.value = '1.1.1.2'
-
-    tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
-    tcp.dst_port.values = ['6000', '6015', '6050']
+    # extract values to be used for assertion
+    size = config.flows[0].size.fixed
+    packets = config.flows[0].duration.fixed_packets.packets
 
     utils.start_traffic(api, config)
+
     utils.wait_for(
-        lambda: results_ok(api, utils, size, packets),
+        lambda: results_ok(api, utils, size, packets * 2),
         'stats to be as expected', timeout_seconds=10
     )
 
