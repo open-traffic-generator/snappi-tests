@@ -1,7 +1,6 @@
-import snappi
 
 
-def test_tcp_bidir_flows(api_addr, tx_addr, rx_addr, utils):
+def test_tcp_unidir_flows(api, utils):
     """
     Configure a raw TCP flow with,
     - list of 6 src ports and 3 dst ports
@@ -10,25 +9,22 @@ def test_tcp_bidir_flows(api_addr, tx_addr, rx_addr, utils):
     Validate,
     - tx/rx frame count and bytes are as expected
     """
-    size = 128
-    packets = 1000
-    api = snappi.api(host=api_addr, ext=utils.get_ext())
     config = api.config()
 
     tx, rx = (
         config.ports
-        .port(name='tx', location=tx_addr)
-        .port(name='rx', location=rx_addr)
+        .port(name='tx', location=utils.settings.ports[0])
+        .port(name='rx', location=utils.settings.ports[1])
     )
 
-    l1 = config.layer1.layer1()[0]
-    l1.name = 'l1 settings'
-    l1.port_names = [rx.name, tx.name]
-    l1.media = utils.settings.media
-
-    flow = config.flows.flow(name='tcp_flow')[-1]
+    flow = config.flows.flow(name='tx_flow')[-1]
     flow.tx_rx.port.tx_name = tx.name
     flow.tx_rx.port.rx_name = rx.name
+
+    size = 128
+    packets = 1000
+    flow.size.fixed = size
+    flow.duration.fixed_packets.packets = packets
 
     eth, ip, tcp = flow.packet.ethernet().ipv4().tcp()
 
@@ -41,8 +37,8 @@ def test_tcp_bidir_flows(api_addr, tx_addr, rx_addr, utils):
     tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
     tcp.dst_port.values = ['6000', '6015', '6050']
 
-    flow.size.fixed = 128
-    flow.duration.fixed_packets.packets = 1000
+    # this will allow us to take over ports that may already be in use
+    config.options.port_options.location_preemption = True
 
     utils.start_traffic(api, config)
     utils.wait_for(
