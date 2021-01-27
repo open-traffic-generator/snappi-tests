@@ -5,6 +5,7 @@
         "localhost;1;1",
         "localhost;1;2"
     ],
+    "ext": null,
     "speed": "speed_1_gbps",
     "media": null,
     "timeout_seconds": 30,
