@@ -4,21 +4,15 @@ This repository consists of end-to-end test scripts written in [snappi](https://
 
 ## Setup
 
-Please make sure that the setup meets [Python Prerequisites](#python-prerequisites).
+Please make sure that the client setup meets [Python Prerequisites](#python-prerequisites).
 
 - Clone this project, `cd` inside it.
 
-- Create virtual environment inside `env/` and activate it.
-  
-  ```sh
-  python -m virtualenv env
-  # on linux
-  source env/bin/activate
-  # on windows
-  env\Scripts\activate on Windows
-  ```
+- Install `snappi` with IxNetwork extension.
 
-  **NOTE:** If you do not wish to activate virtual env, you use `env/bin/python` (or `env\scripts\python` on Windows) instead of `python`.
+  ```sh
+  python -m pip install --upgrade snappi[ixnetwork]
+  ```
 
 - Install test dependencies.
 
@@ -31,7 +25,8 @@ Please make sure that the setup meets [Python Prerequisites](#python-prerequisit
   ```sh
   # provide intended API Server and port addresses
   vi tests/settings.json
-  python -m pytest tests/raw/test_tcp_bidir_flows.py
+  # run a test
+  python -m pytest tests/raw/test_tcp_unidir_flows.py
   ```
 
 #### Python Prerequisites
@@ -50,4 +45,12 @@ Please make sure that the setup meets [Python Prerequisites](#python-prerequisit
 
   ```sh
   python -m pip install --upgrade virtualenv
+  # create virtual environment inside `env/` and activate it.
+  python -m virtualenv env
+  # on linux
+  source env/bin/activate
+  # on windows
+  env\Scripts\activate on Windows
   ```
+
+  **NOTE:** If you do not wish to activate virtual env, you use `env/bin/python` (or `env\scripts\python` on Windows) instead of `python`.
