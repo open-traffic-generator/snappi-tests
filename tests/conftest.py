@@ -28,10 +28,11 @@ def settings():
 @pytest.fixture(scope='session')
 def api():
     # handle to make API calls
-    host = utl.get_host()
-    ext = utl.get_ext()
-    yield snappi.api(host=host, ext=ext)
-
+    api = snappi.api(host=utl.settings.api_server, ext=utl.settings.ext)
+    yield api
+    # TODO: this is specific to IxNetwork
+    if api.assistant is not None:
+        api.assistant.Session.remove()
 
 @pytest.fixture
 def b2b_raw_config():
