@@ -1,11 +1,6 @@
 import snappi
-import pytest
 
 
-@pytest.mark.parametrize(
-    '   api_addr,           tx_addr,            rx_addr',
-    [['127.0.0.1:11009', '127.0.0.1;1;1', '127.0.0.1;1;2']]
-)
 def test_tcp_bidir_flows(api_addr, tx_addr, rx_addr, utils):
     """
     Configure a raw TCP flow with,
@@ -14,7 +9,6 @@ def test_tcp_bidir_flows(api_addr, tx_addr, rx_addr, utils):
     - 10% line rate
     Validate,
     - tx/rx frame count and bytes are as expected
-    - all captured frames have expected src and dst ports
     """
     size = 128
     packets = 1000
@@ -26,6 +20,11 @@ def test_tcp_bidir_flows(api_addr, tx_addr, rx_addr, utils):
         .port(name='tx', location=tx_addr)
         .port(name='rx', location=rx_addr)
     )
+
+    l1 = config.layer1.layer1()[0]
+    l1.name = 'l1 settings'
+    l1.port_names = [rx.name, tx.name]
+    l1.media = utils.settings.media
 
     flow = config.flows.flow(name='tcp_flow')[-1]
     flow.tx_rx.port.tx_name = tx.name

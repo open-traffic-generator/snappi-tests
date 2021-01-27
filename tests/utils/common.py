@@ -110,7 +110,7 @@ def get_host():
     """
     Returns api client configured according to global settings
     """
-    return "http://" + settings.api_server
+    return settings.api_server
 
 
 def get_ext():
@@ -192,7 +192,7 @@ def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
         time.sleep(interval_seconds)
 
 
-def get_all_stats(api):
+def get_all_stats(api, print_output=True):
     """
     Returns all port and flow stats
     """
@@ -207,6 +207,9 @@ def get_all_stats(api):
     flow_results = api.get_flow_metrics(flow_results_request)
     if flow_results is None:
         flow_results = []
+
+    if print_output:
+        print_stats(port_stats=port_results, flow_stats=flow_results)
 
     return port_results, flow_results
 
@@ -226,3 +229,48 @@ def total_bytes_ok(port_results, flow_results, expected):
 
     return port_tx == port_rx == flow_rx == expected
 
+
+def print_stats(port_stats=None, flow_stats=None, clear_screen=None):
+    if clear_screen is None:
+        clear_screen = settings.dynamic_stats_output
+
+    if clear_screen:
+        os.system('clear')
+
+    if port_stats is not None:
+        row_format = "{:>15}" * 6
+        border = '-' * (15 * 6 + 5)
+        print('\nPort Stats')
+        print(border)
+        print(
+            row_format.format(
+                'Port', 'Tx Frames', 'Tx Bytes', 'Rx Frames', 'Rx Bytes',
+                'Tx FPS'
+            )
+        )
+        for stat in port_stats:
+            print(
+                row_format.format(
+                    stat.name, stat.frames_tx, stat.bytes_tx,
+                    stat.frames_rx, stat.bytes_rx, stat.frames_tx_rate
+                )
+            )
+        print(border)
+        print("")
+        print("")
+
+    if flow_stats is not None:
+        row_format = "{:>15}" * 3
+        border = '-' * (15 * 3 + 5)
+        print('Flow Stats')
+        print(border)
+        print(row_format.format('Flow', 'Rx Frames', 'Rx Bytes'))
+        for stat in flow_stats:
+            print(
+                row_format.format(
+                    stat.name, stat.frames_rx, stat.bytes_rx
+                )
+            )
+        print(border)
+        print("")
+        print("")

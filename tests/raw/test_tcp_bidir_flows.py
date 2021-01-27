@@ -1,12 +1,15 @@
+import pytest
+
+
+@pytest.mark.sanity
 def test_tcp_bidir_flows(api, tx_addr, rx_addr, utils):
     """
-    Configure a raw TCP flow with,
+    Configure a raw TCP bi-directional flows with,
     - list of 6 src ports and 3 dst ports
     - 100 frames of 1518B size each
     - 10% line rate
     Validate,
     - tx/rx frame count and bytes are as expected
-    - all captured frames have expected src and dst ports
     """
     size = 128
     packets = 1000
@@ -18,10 +21,18 @@ def test_tcp_bidir_flows(api, tx_addr, rx_addr, utils):
         .port(name='rx', location=rx_addr)
     )
 
+    l1 = config.layer1.layer1()[0]
+    l1.name = 'l1 settings'
+    l1.port_names = [rx.name, tx.name]
+    l1.media = utils.settings.media
+
     # flow1
-    flow1 = config.flows.flow(name='tcp_flow1')[0]
+    flows = config.flows.flow(name='tcp_flow1').flow(name='tcp_flow2')
+    flow1 = flows[0]
     flow1.tx_rx.port.tx_name = tx.name
     flow1.tx_rx.port.rx_name = rx.name
+    flow1.size.fixed = 128
+    flow1.duration.fixed_packets.packets = 1000
 
     eth, ip, tcp = flow1.packet.ethernet().ipv4().tcp()
 
@@ -34,13 +45,12 @@ def test_tcp_bidir_flows(api, tx_addr, rx_addr, utils):
     tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
     tcp.dst_port.values = ['6000', '6015', '6050']
 
-    flow1.size.fixed = 128
-    flow1.duration.fixed_packets.packets = 1000
-
     # flow2
-    flow2 = config.flows.flow(name='tcp_flow2')[1]
+    flow2 = flows[1]
     flow2.tx_rx.port.tx_name = rx.name
     flow2.tx_rx.port.rx_name = tx.name
+    flow2.size.fixed = 128
+    flow2.duration.fixed_packets.packets = 1000
 
     eth, ip, tcp = flow2.packet.ethernet().ipv4().tcp()
 
@@ -52,9 +62,6 @@ def test_tcp_bidir_flows(api, tx_addr, rx_addr, utils):
 
     tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
     tcp.dst_port.values = ['6000', '6015', '6050']
-
-    flow2.size.fixed = 128
-    flow2.duration.fixed_packets.packets = 1000
 
     utils.start_traffic(api, config)
     utils.wait_for(
