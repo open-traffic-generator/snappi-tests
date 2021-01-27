@@ -1,0 +1,94 @@
+{
+    "ports": [
+        {
+            "name": "tx",
+            "location": "localhost:5555"
+        },
+        {
+            "name": "rx",
+            "location": "localhost:5555"
+        }
+    ],
+    "layer1": [
+        {
+            "name": "l1",
+            "port_names": ["tx", "rx"],
+            "speed": "speed_1_gbps"
+        }
+    ],
+    "captures": [
+        {
+            "name": "c1",
+            "port_names": ["rx"],
+            "enable": true,
+            "choice": "pcap"
+        }
+    ],
+    "flows": [
+        {
+            "name": "f1",
+            "tx_rx": {
+                "choice": "port",
+                "port": {
+                    "tx_port_name": "tx",
+                    "rx_port_name": "rx"
+                }
+            },
+            "size": {
+                "choice": "fixed",
+                "fixed": 1518
+            },
+            "rate": {
+                "unit": "line",
+                "value": 10
+            },
+            "duration": {
+                "choice": "packets",
+                "packets": {
+                    "packets": 100
+                }
+            },
+            "packet": [
+                {
+                    "choice": "ethernet",
+                    "ethernet": {
+                        "dst": {
+                            "choice": "fixed",
+                            "fixed": "00:AB:BC:AB:BC:AB"
+                        },
+                        "src": {
+                            "choice": "fixed",
+                            "fixed": "00:CD:DC:CD:DC:CD"
+                        }
+                    }
+                },
+                {
+                    "choice": "ipv4",
+                    "ipv4": {
+                        "dst": {
+                            "choice": "fixed",
+                            "fixed": "1.1.1.1"
+                        },
+                        "src": {
+                            "choice": "fixed",
+                            "fixed": "1.1.1.2"
+                        }
+                    }
+                },
+                {
+                    "choice": "tcp",
+                    "tcp": {
+                        "src_port": {
+                            "choice": "list",
+                            "list": ["3025", "3027", "3028", "3029", "3030", "3040"]
+                        },
+                        "dst_port": {
+                            "choice": "list",
+                            "list": ["8070", "8090", "9010", "9020", "9030", "9040"]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
