@@ -123,15 +123,26 @@ def get_ext():
 
 def start_traffic(api, cfg):
     """
-    Applies configuration, starts capture and starts flows.
+    Applies configuration, and starts flows.
     """
     print('Setting config ...')
     api.set_config(cfg)
 
     print('Starting transmit on all flows ...')
-    tx_state = api.transmit_state()
-    tx_state.state = 'start'
-    api.set_transmit_state(tx_state)
+    transmit_state = api.transmit_state()
+    transmit_state.state = 'start'
+    api.set_transmit_state(transmit_state)
+
+
+def stop_traffic(api):
+    """
+    Stops flows
+    """
+
+    print('Starting transmit on all flows ...')
+    transmit_state = api.transmit_state()
+    transmit_state.state = 'stop'
+    api.set_transmit_state(transmit_state)
 
 
 def seconds_elapsed(start_seconds):
@@ -181,23 +192,36 @@ def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
         time.sleep(interval_seconds)
 
 
-def get_all_stats(api, print_output=True):
+def get_all_stats(api):
     """
     Returns all port and flow stats
     """
     print('Fetching all port stats ...')
-    port_req = api.port_metrics_request()
-    port_results = api.get_port_metrics(port_req)
+    port_results_request = api.port_metrics_request()
+    port_results = api.get_port_metrics(port_results_request)
     if port_results is None:
         port_results = []
 
     print('Fetching all flow stats ...')
-    flow_req = api.flow_metrics_request()
-    flow_results = api.get_flow_metrics(flow_req)
+    flow_results_request = api.flow_metrics_request()
+    flow_results = api.get_flow_metrics(flow_results_request)
     if flow_results is None:
         flow_results = []
 
-    # if print_output:
-    #     print_stats(port_stats=port_results, flow_stats=flow_results)
-
     return port_results, flow_results
+
+
+def total_frames_ok(port_results, flow_results, expected):
+    port_tx = sum([p.frames_tx for p in port_results])
+    port_rx = sum([p.frames_rx for p in port_results])
+    flow_rx = sum([f.frames_rx for f in flow_results])
+
+    return port_tx == port_rx == flow_rx == expected
+
+
+def total_bytes_ok(port_results, flow_results, expected):
+    port_tx = sum([p.bytes_tx for p in port_results])
+    port_rx = sum([p.bytes_rx for p in port_results])
+    flow_rx = sum([f.bytes_rx for f in flow_results])
+
+    return port_tx == port_rx == flow_rx == expected
