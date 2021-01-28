@@ -1,4 +1,3 @@
-import json
 
 
 def test_tcp_bidir_flows(api, utils):
@@ -13,8 +12,7 @@ def test_tcp_bidir_flows(api, utils):
     config = api.config()
     # load JSON config from configs/
     with open(utils.get_test_config_path('tcp_bidir_flows.json')) as f:
-        config_dict = json.load(f)
-        config.deserialize(config_dict['config'])
+        config.deserialize(f.read())
 
     # update port locations
     config.ports[0].location = utils.settings.ports[0]

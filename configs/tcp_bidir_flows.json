@@ -1,138 +1,136 @@
 {
-  "config": {
-    "ports": [
-      {
-        "location": "localhost;1;1",
-        "name": "tx"
+  "ports": [
+    {
+      "location": "localhost;1;1",
+      "name": "tx"
+    },
+    {
+      "location": "localhost;1;2",
+      "name": "rx"
+    }
+  ],
+  "flows": [
+    {
+      "name": "tx_flow",
+      "tx_rx": {
+        "port": {
+          "tx_name": "tx",
+          "rx_name": "rx"
+        },
+        "choice": "port"
       },
-      {
-        "location": "localhost;1;2",
-        "name": "rx"
-      }
-    ],
-    "flows": [
-      {
-        "name": "tx_flow",
-        "tx_rx": {
-          "port": {
-            "tx_name": "tx",
-            "rx_name": "rx"
-          },
-          "choice": "port"
-        },
-        "size": {
-          "fixed": 128,
-          "choice": "fixed"
-        },
-        "duration": {
-          "fixed_packets": {
-            "packets": 1000
-          },
-          "choice": "fixed_packets"
-        },
-        "packet": [
-          {
-            "ethernet": {
-              "src": {
-                "value": "00:CD:DC:CD:DC:CD",
-                "choice": "value"
-              },
-              "dst": {
-                "value": "00:AB:BC:AB:BC:AB",
-                "choice": "value"
-              }
-            },
-            "choice": "ethernet"
-          },
-          {
-            "ipv4": {
-              "src": {
-                "value": "1.1.1.2",
-                "choice": "value"
-              },
-              "dst": {
-                "value": "1.1.1.1",
-                "choice": "value"
-              }
-            },
-            "choice": "ipv4"
-          },
-          {
-            "tcp": {
-              "src_port": {
-                "values": ["5000", "5050", "5015", "5040", "5032", "5021"],
-                "choice": "values"
-              },
-              "dst_port": {
-                "values": ["6000", "6015", "6050"],
-                "choice": "values"
-              }
-            },
-            "choice": "tcp"
-          }
-        ]
+      "size": {
+        "fixed": 128,
+        "choice": "fixed"
       },
-      {
-        "name": "rx_flow",
-        "tx_rx": {
-          "port": {
-            "tx_name": "rx",
-            "rx_name": "tx"
-          },
-          "choice": "port"
+      "duration": {
+        "fixed_packets": {
+          "packets": 1000
         },
-        "size": {
-          "fixed": 128,
-          "choice": "fixed"
+        "choice": "fixed_packets"
+      },
+      "packet": [
+        {
+          "ethernet": {
+            "src": {
+              "value": "00:CD:DC:CD:DC:CD",
+              "choice": "value"
+            },
+            "dst": {
+              "value": "00:AB:BC:AB:BC:AB",
+              "choice": "value"
+            }
+          },
+          "choice": "ethernet"
         },
-        "duration": {
-          "fixed_packets": {
-            "packets": 1000
+        {
+          "ipv4": {
+            "src": {
+              "value": "1.1.1.2",
+              "choice": "value"
+            },
+            "dst": {
+              "value": "1.1.1.1",
+              "choice": "value"
+            }
           },
-          "choice": "fixed_packets"
+          "choice": "ipv4"
         },
-        "packet": [
-          {
-            "ethernet": {
-              "src": {
-                "value": "00:AB:BC:AB:BC:AB",
-                "choice": "value"
-              },
-              "dst": {
-                "value": "00:CD:DC:CD:DC:CD",
-                "choice": "value"
-              }
+        {
+          "tcp": {
+            "src_port": {
+              "values": ["5000", "5050", "5015", "5040", "5032", "5021"],
+              "choice": "values"
             },
-            "choice": "ethernet"
+            "dst_port": {
+              "values": ["6000", "6015", "6050"],
+              "choice": "values"
+            }
           },
-          {
-            "ipv4": {
-              "src": {
-                "value": "1.1.1.1",
-                "choice": "value"
-              },
-              "dst": {
-                "value": "1.1.1.2",
-                "choice": "value"
-              }
+          "choice": "tcp"
+        }
+      ]
+    },
+    {
+      "name": "rx_flow",
+      "tx_rx": {
+        "port": {
+          "tx_name": "rx",
+          "rx_name": "tx"
+        },
+        "choice": "port"
+      },
+      "size": {
+        "fixed": 128,
+        "choice": "fixed"
+      },
+      "duration": {
+        "fixed_packets": {
+          "packets": 1000
+        },
+        "choice": "fixed_packets"
+      },
+      "packet": [
+        {
+          "ethernet": {
+            "src": {
+              "value": "00:AB:BC:AB:BC:AB",
+              "choice": "value"
             },
-            "choice": "ipv4"
+            "dst": {
+              "value": "00:CD:DC:CD:DC:CD",
+              "choice": "value"
+            }
           },
-          {
-            "tcp": {
-              "src_port": {
-                "values": ["5000", "5050", "5015", "5040", "5032", "5021"],
-                "choice": "values"
-              },
-              "dst_port": {
-                "values": ["6000", "6015", "6050"],
-                "choice": "values"
-              }
+          "choice": "ethernet"
+        },
+        {
+          "ipv4": {
+            "src": {
+              "value": "1.1.1.1",
+              "choice": "value"
             },
-            "choice": "tcp"
-          }
-        ]
-      }
-    ]
-  }
+            "dst": {
+              "value": "1.1.1.2",
+              "choice": "value"
+            }
+          },
+          "choice": "ipv4"
+        },
+        {
+          "tcp": {
+            "src_port": {
+              "values": ["5000", "5050", "5015", "5040", "5032", "5021"],
+              "choice": "values"
+            },
+            "dst_port": {
+              "values": ["6000", "6015", "6050"],
+              "choice": "values"
+            }
+          },
+          "choice": "tcp"
+        }
+      ]
+    }
+  ]
 }

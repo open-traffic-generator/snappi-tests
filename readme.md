@@ -11,7 +11,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
 - Install `snappi` with IxNetwork extension.
 
   ```sh
-  python -m pip install --upgrade snappi[ixnetwork]
+  python -m pip install --upgrade "snappi[ixnetwork]"
   ```
 
 - Install test dependencies.
