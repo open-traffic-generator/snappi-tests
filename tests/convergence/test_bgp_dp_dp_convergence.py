@@ -27,7 +27,7 @@ def test_bgp_dp_dp_convergence(api, utils):
 
     # Trigger withdraw routes by link down on port1
     # TODO: Concrete implementation is still pending(#128)
-    ls = api.link_state(port_name=bgp_convergence_config.ports[0].name)
+    ls = api.link_state(port_name=bgp_convergence_config.ports[1].name)
     ls.state = ls.DOWN
     api.set_link_state(ls)
 
