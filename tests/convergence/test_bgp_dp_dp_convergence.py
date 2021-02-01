@@ -43,7 +43,7 @@ def test_bgp_dp_dp_convergence(api, utils):
     rx_frames = flow_stats[0].frames_rx
 
     # Calculate Convergence
-    dp_convergence = (tx_frames - rx_frames) / tx_frame_rate
+    dp_convergence = (tx_frames - rx_frames) * 1000 / tx_frame_rate
     print("dp/dp convergence:", dp_convergence)
 
 
