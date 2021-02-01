@@ -20,20 +20,20 @@ def bgp_convergence_config(api, utils):
 
     config.options.port_options.location_preemption = True
     ly = config.layer1.layer1()[-1]
-    ly.name = 'l1 settings'
+    ly.name = 'ly'
     ly.port_names = [tx.name, rx1.name, rx2.name]
     ly.ieee_media_defaults = False
     ly.auto_negotiate = False
     ly.speed = utils.settings.speed
 
     tx_device, rx1_device, rx2_device = (
-        config.devices.
-        device(name="tx_device", container_name=tx.name).
-        device(name="rx1_device", container_name=rx1.name).
-        device(name="rx2_device", container_name=rx2.name)
+        config.devices
+        .device(name="tx_device", container_name=tx.name)
+        .device(name="rx1_device", container_name=rx1.name)
+        .device(name="rx2_device", container_name=rx2.name)
     )
 
-    # TODO : DUT interfaces configuration (not sure how to do this yet)
+    # TODO: DUT interfaces configuration should be imported from external settings
 
     # tx_device config
     tx_device.ipv4.name = "tx_ipv4"
