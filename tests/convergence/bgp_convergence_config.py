@@ -74,8 +74,6 @@ def bgp_convergence_config(api, utils):
     rx2_rr.prefix.value = "32"
 
     # flow config
-    # TODO : Implement rx_names to be names of device names
-    # or network group names (#249)
     flow = config.flows.flow(name='convergence_test')[-1]
     flow.tx_rx.device.tx_names = [tx_device.name]
     flow.tx_rx.device.rx_names = [rx1_rr.name, rx2_rr.name]
