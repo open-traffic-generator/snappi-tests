@@ -13,7 +13,7 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     """
     api.set_config(bgp_convergence_config)
     # name of the port that should be shutdown to trigger withdraw route
-    port_to_shut = bgp_convergence_config.ports[1].name
+    primary_rx_port = bgp_convergence_config.ports[1].name
 
     # Start traffic
     ts = api.transmit_state()
@@ -29,13 +29,13 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
 
     # Trigger withdraw routes by doing a link down on port1
     ls = api.link_state()
-    ls.port_names = [port_to_shut]
+    ls.port_names = [primary_rx_port]
     ls.state = ls.DOWN
     api.set_link_state(ls)
 
     # Wait for port to go down
     utils.wait_for(
-        lambda: is_port_down(api, port_to_shut), 'port to go down'
+        lambda: is_port_rx_stopped(api, primary_rx_port), 'port rx to stop'
     )
 
     # Stop traffic
@@ -61,10 +61,7 @@ def is_traffic_started(api):
     Returns true if traffic in start state
     """
     flow_stats = api.get_flow_metrics(api.flow_metrics_request())
-    tx_frame_rate = flow_stats[0].frames_tx_rate
-    if int(tx_frame_rate) > 0:
-        return True
-    return False
+    return all([int(fs.frames_tx_rate) > 0 for fs in flow_stats])
 
 
 def is_traffic_stopped(api):
@@ -72,19 +69,16 @@ def is_traffic_stopped(api):
     Returns true if traffic in stop state
     """
     flow_stats = api.get_flow_metrics(api.flow_metrics_request())
-    tx_frame_rate = flow_stats[0].frames_tx_rate
-    print(int(tx_frame_rate))
-    if int(tx_frame_rate) == 0:
-        return True
-    return False
+    return all([int(fs.frames_tx_rate) == 0 for fs in flow_stats])
 
 
-def is_port_down(api, port_to_shut):
+def is_port_rx_stopped(api, port_name):
     """
     Returns true if port is down
     """
-    port_stats = api.get_port_metrics(api.port_metrics_request())
-    for ps in port_stats:
-        if ps.name == port_to_shut and int(ps.frames_rx_rate) == 0:
-            return True
+    port_metrics = api.port_metrics_request()
+    port_metrics.port_names = [port_name]
+    port_stats = api.get_port_metrics(port_metrics)
+    if int(port_stats[0].frames_rx_rate) == 0:
+        return True
     return False
