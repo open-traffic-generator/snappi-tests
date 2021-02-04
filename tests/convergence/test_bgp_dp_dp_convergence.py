@@ -11,6 +11,7 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     8. Obtain tx frames and rx frames from stats and calculate
        dp/dp convergence
     """
+
     api.set_config(bgp_convergence_config)
     # name of the port that should be shutdown to trigger withdraw route
     primary_rx_port = bgp_convergence_config.ports[1].name
@@ -24,7 +25,9 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     utils.wait_for(
         lambda: is_traffic_started(api), 'traffic to start'
     )
-    flow_stats = api.get_flow_metrics(api.flow_metrics_request())
+    req = api.metrics_request()
+    req.choice = req.FLOW
+    flow_stats = api.get_metrics(req)
     tx_frame_rate = flow_stats[0].frames_tx_rate
 
     # Trigger withdraw routes by doing a link down on port1
@@ -47,7 +50,9 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     utils.wait_for(
         lambda: is_traffic_stopped(api), 'traffic to stop'
     )
-    flow_stats = api.get_flow_metrics(api.flow_metrics_request())
+    req = api.metrics_request()
+    req.choice = req.FLOW
+    flow_stats = api.get_metrics(req)
     tx_frames = flow_stats[0].frames_tx
     rx_frames = sum([fs.frames_rx for fs in flow_stats])
 
@@ -60,7 +65,9 @@ def is_traffic_started(api):
     """
     Returns true if traffic in start state
     """
-    flow_stats = api.get_flow_metrics(api.flow_metrics_request())
+    req = api.metrics_request()
+    req.choice = req.FLOW
+    flow_stats = api.get_metrics(req)
     return all([int(fs.frames_tx_rate) > 0 for fs in flow_stats])
 
 
@@ -68,7 +75,9 @@ def is_traffic_stopped(api):
     """
     Returns true if traffic in stop state
     """
-    flow_stats = api.get_flow_metrics(api.flow_metrics_request())
+    req = api.metrics_request()
+    req.choice = req.FLOW
+    flow_stats = api.get_metrics(req)
     return all([int(fs.frames_tx_rate) == 0 for fs in flow_stats])
 
 
@@ -76,9 +85,10 @@ def is_port_rx_stopped(api, port_name):
     """
     Returns true if port is down
     """
-    port_metrics = api.port_metrics_request()
-    port_metrics.port_names = [port_name]
-    port_stats = api.get_port_metrics(port_metrics)
+    req = api.metrics_request()
+    req.port.port_names = [port_name]
+    port_stats = api.get_metrics(req)
     if int(port_stats[0].frames_rx_rate) == 0:
         return True
     return False
+
