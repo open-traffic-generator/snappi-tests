@@ -207,23 +207,23 @@ def get_all_stats(api, print_output=True):
     print('Fetching all port stats ...')
     request = api.metrics_request()
     request.port.port_names = []
-    port_results = api.get_metrics(request)
-    if port_results.port_metrics is None:
+    port_results = api.get_metrics(request).port_metrics
+    if port_results is None:
         port_results = []
 
     print('Fetching all flow stats ...')
     request = api.metrics_request()
     request.flow.flow_names = []
-    flow_results = api.get_metrics(request)
-    if flow_results.flow_metrics is None:
+    flow_results = api.get_metrics(request).flow_metrics
+    if flow_results is None:
         flow_results = []
 
     if print_output:
         print_stats(
-            port_stats=port_results.port_metrics,
-            flow_stats=flow_results.flow_metrics)
+            port_stats=port_results,
+            flow_stats=flow_results)
 
-    return port_results.port_metrics, flow_results.flow_metrics
+    return port_results, flow_results
 
 
 def total_frames_ok(port_results, flow_results, expected):
@@ -289,7 +289,7 @@ def print_stats(port_stats=None, flow_stats=None, clear_screen=None):
 
 
 def print_warnings(warnings):
-    if warnings == []:
+    if warnings is None:
         return
     for warning in warnings:
         print("Warning:", warning)

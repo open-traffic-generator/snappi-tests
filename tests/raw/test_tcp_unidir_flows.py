@@ -21,6 +21,7 @@ def test_tcp_unidir_flows(api, utils):
     ly.name = 'ly'
     ly.port_names = [tx.name, rx.name]
     ly.media = utils.settings.media
+    ly.speed = utils.settings.speed
 
     flow = config.flows.flow(name='tx_flow')[-1]
     flow.tx_rx.port.tx_name = tx.name
