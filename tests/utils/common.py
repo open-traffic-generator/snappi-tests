@@ -131,9 +131,9 @@ def start_traffic(api, cfg):
     api.set_config(cfg)
 
     print('Starting transmit on all flows ...')
-    transmit_state = api.transmit_state()
-    transmit_state.state = 'start'
-    api.set_transmit_state(transmit_state)
+    ts = api.transmit_state()
+    ts.state = ts.START
+    api.set_transmit_state(ts)
 
 
 def stop_traffic(api):
@@ -142,9 +142,9 @@ def stop_traffic(api):
     """
 
     print('Starting transmit on all flows ...')
-    transmit_state = api.transmit_state()
-    transmit_state.state = 'stop'
-    api.set_transmit_state(transmit_state)
+    ts = api.transmit_state()
+    ts.state = ts.STOP
+    api.set_transmit_state(ts)
 
 
 def seconds_elapsed(start_seconds):
@@ -199,14 +199,16 @@ def get_all_stats(api, print_output=True):
     Returns all port and flow stats
     """
     print('Fetching all port stats ...')
-    port_results_request = api.port_metrics_request()
-    port_results = api.get_port_metrics(port_results_request)
+    req = api.metrics_request()
+    req.choice = req.PORT
+    port_results = api.get_metrics(req)
     if port_results is None:
         port_results = []
 
     print('Fetching all flow stats ...')
-    flow_results_request = api.flow_metrics_request()
-    flow_results = api.get_flow_metrics(flow_results_request)
+    req = api.metrics_request()
+    req.choice = req.FLOW
+    flow_results = api.get_metrics(req)
     if flow_results is None:
         flow_results = []
 

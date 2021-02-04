@@ -19,6 +19,10 @@ def test_basic_flow_stats(settings):
         .port(name='tx', location=settings.ports[0])
         .port(name='rx', location=settings.ports[1])
     )
+    ly = config.layer1.layer1()[-1]
+    ly.name = 'ly'
+    ly.port_names = [tx.name, rx.name]
+    ly.media = settings.media
     flw = config.flows.flow(name='flw')[-1]
 
     flw.size.fixed = 128
@@ -37,6 +41,8 @@ def test_basic_flow_stats(settings):
     api.set_transmit_state(ts)
 
     while True:
-        metrics = api.get_flow_metrics(api.flow_metrics_request())
+        req = api.metrics_request()
+        req.choice = req.FLOW
+        metrics = api.get_metrics(req)
         if all([m.frames_tx == 10000 == m.frames_rx for m in metrics]):
             break
