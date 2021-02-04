@@ -12,29 +12,31 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
        dp/dp convergence
     """
 
-    api.set_config(bgp_convergence_config)
+    response = api.set_config(bgp_convergence_config)
+    assert(len(response.errors)) == 0
     # name of the port that should be shutdown to trigger withdraw route
     primary_rx_port = bgp_convergence_config.ports[1].name
 
     # Start traffic
     ts = api.transmit_state()
     ts.state = ts.START
-    api.set_transmit_state(ts)
+    response = api.set_transmit_state(ts)
+    assert(len(response.errors)) == 0
 
     # Wait for traffic to start and get tx frame rate
     utils.wait_for(
-        lambda: is_traffic_started(api), 'traffic to start'
+        lambda: is_traffic_started(api, utils), 'traffic to start'
     )
-    req = api.metrics_request()
-    req.choice = req.FLOW
-    flow_stats = api.get_metrics(req)
+
+    _, flow_stats = utils.get_all_stats(api)
     tx_frame_rate = flow_stats[0].frames_tx_rate
 
     # Trigger withdraw routes by doing a link down on port1
     ls = api.link_state()
     ls.port_names = [primary_rx_port]
     ls.state = ls.DOWN
-    api.set_link_state(ls)
+    response = api.set_link_state(ls)
+    assert(len(response.errors)) == 0
 
     # Wait for port to go down
     utils.wait_for(
@@ -44,15 +46,14 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     # Stop traffic
     ts = api.transmit_state()
     ts.state = ts.STOP
-    api.set_transmit_state(ts)
+    response = api.set_transmit_state(ts)
+    assert(len(response.errors)) == 0
 
     # Wait for traffic to stop and get total tx frames & rx frames
     utils.wait_for(
-        lambda: is_traffic_stopped(api), 'traffic to stop'
+        lambda: is_traffic_stopped(api, utils), 'traffic to stop'
     )
-    req = api.metrics_request()
-    req.choice = req.FLOW
-    flow_stats = api.get_metrics(req)
+    _, flow_stats = utils.get_all_stats(api)
     tx_frames = flow_stats[0].frames_tx
     rx_frames = sum([fs.frames_rx for fs in flow_stats])
 
@@ -61,23 +62,19 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     print("dp/dp convergence: {} ms".format(int(dp_convergence)))
 
 
-def is_traffic_started(api):
+def is_traffic_started(api, utils):
     """
     Returns true if traffic in start state
     """
-    req = api.metrics_request()
-    req.choice = req.FLOW
-    flow_stats = api.get_metrics(req)
+    _, flow_stats = utils.get_all_stats(api)
     return all([int(fs.frames_tx_rate) > 0 for fs in flow_stats])
 
 
-def is_traffic_stopped(api):
+def is_traffic_stopped(api, utils):
     """
     Returns true if traffic in stop state
     """
-    req = api.metrics_request()
-    req.choice = req.FLOW
-    flow_stats = api.get_metrics(req)
+    _, flow_stats = utils.get_all_stats(api)
     return all([int(fs.frames_tx_rate) == 0 for fs in flow_stats])
 
 
@@ -87,8 +84,7 @@ def is_port_rx_stopped(api, port_name):
     """
     req = api.metrics_request()
     req.port.port_names = [port_name]
-    port_stats = api.get_metrics(req)
+    port_stats = api.get_metrics(req).port_metrics
     if int(port_stats[0].frames_rx_rate) == 0:
         return True
     return False
-

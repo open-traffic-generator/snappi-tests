@@ -17,6 +17,11 @@ def test_tcp_unidir_flows(api, utils):
         .port(name='rx', location=utils.settings.ports[1])
     )
 
+    ly = config.layer1.layer1()[-1]
+    ly.name = 'ly'
+    ly.port_names = [tx.name, rx.name]
+    ly.media = utils.settings.media
+
     flow = config.flows.flow(name='tx_flow')[-1]
     flow.tx_rx.port.tx_name = tx.name
     flow.tx_rx.port.rx_name = rx.name
