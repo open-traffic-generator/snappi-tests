@@ -35,14 +35,16 @@ def test_basic_flow_stats(settings):
     # this will allow us to take over ports that may already be in use
     config.options.port_options.location_preemption = True
 
-    api.set_config(config)
+    response = api.set_config(config)
+    assert(len(response.errors)) == 0
     ts = api.transmit_state()
     ts.state = ts.START
-    api.set_transmit_state(ts)
+    response = api.set_transmit_state(ts)
+    assert(len(response.errors)) == 0
 
     while True:
         req = api.metrics_request()
-        req.choice = req.FLOW
-        metrics = api.get_metrics(req)
+        req.flow.flow_names = []
+        metrics = api.get_metrics(req).flow_metrics
         if all([m.frames_tx == 10000 == m.frames_rx for m in metrics]):
             break

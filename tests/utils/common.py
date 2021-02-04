@@ -128,12 +128,16 @@ def start_traffic(api, cfg):
     Applies configuration, and starts flows.
     """
     print('Setting config ...')
-    api.set_config(cfg)
+    response = api.set_config(cfg)
+    print_warnings(response.warnings)
+    assert(len(response.errors)) == 0
 
     print('Starting transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.START
-    api.set_transmit_state(ts)
+    response = api.set_transmit_state(ts)
+    print_warnings(response.warnings)
+    assert(len(response.errors)) == 0
 
 
 def stop_traffic(api):
@@ -141,10 +145,12 @@ def stop_traffic(api):
     Stops flows
     """
 
-    print('Starting transmit on all flows ...')
+    print('Stop transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.STOP
-    api.set_transmit_state(ts)
+    response = api.set_transmit_state(ts)
+    print_warnings(response.warnings)
+    assert(len(response.errors)) == 0
 
 
 def seconds_elapsed(start_seconds):
@@ -199,21 +205,23 @@ def get_all_stats(api, print_output=True):
     Returns all port and flow stats
     """
     print('Fetching all port stats ...')
-    req = api.metrics_request()
-    req.choice = req.PORT
-    port_results = api.get_metrics(req)
+    request = api.metrics_request()
+    request.port.port_names = []
+    port_results = api.get_metrics(request).port_metrics
     if port_results is None:
         port_results = []
 
     print('Fetching all flow stats ...')
-    req = api.metrics_request()
-    req.choice = req.FLOW
-    flow_results = api.get_metrics(req)
+    request = api.metrics_request()
+    request.flow.flow_names = []
+    flow_results = api.get_metrics(request).flow_metrics
     if flow_results is None:
         flow_results = []
 
     if print_output:
-        print_stats(port_stats=port_results, flow_stats=flow_results)
+        print_stats(
+            port_stats=port_results,
+            flow_stats=flow_results)
 
     return port_results, flow_results
 
@@ -278,3 +286,10 @@ def print_stats(port_stats=None, flow_stats=None, clear_screen=None):
         print(border)
         print("")
         print("")
+
+
+def print_warnings(warnings):
+    if warnings is None:
+        return
+    for warning in warnings:
+        print("Warning:", warning)
