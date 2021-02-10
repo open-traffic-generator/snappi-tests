@@ -19,32 +19,48 @@ def test_basic_flow_stats(settings):
         .port(name='tx', location=settings.ports[0])
         .port(name='rx', location=settings.ports[1])
     )
-    ly = config.layer1.layer1()[-1]
-    ly.name = 'ly'
+    # configure layer 1 properties
+    ly, = config.layer1.layer1(name='ly')
     ly.port_names = [tx.name, rx.name]
+    ly.speed = settings.speed
     ly.media = settings.media
-    flw = config.flows.flow(name='flw')[-1]
-
+    # configure capture
+    cap, = config.captures.capture(name='cap')
+    cap.port_names = [rx.name]
+    cap.format = cap.PCAP
+    # configure flow properties
+    flw, = config.flows.flow(name='flw')
+    # flow endpoints
+    flw.tx_rx.port.tx_name = tx.name
+    flw.tx_rx.port.rx_name = rx.name
+    # configure rate, size, frame count
     flw.size.fixed = 128
     flw.rate.pps = 1000
     flw.duration.fixed_packets.packets = 10000
-    flw.tx_rx.port.tx_name = tx.name
-    flw.tx_rx.port.rx_name = rx.name
-
+    # configure protocol headers with defaults fields
     flw.packet.ethernet().vlan().ipv4().tcp()
-    # this will allow us to take over ports that may already be in use
-    config.options.port_options.location_preemption = True
-
-    response = api.set_config(config)
-    assert(len(response.errors)) == 0
+    # push configuration
+    api.set_config(config)
+    # start capture
+    cs = api.capture_state()
+    cs.state = cs.START
+    api.set_capture_state(cs)
+    # start transmitting configured flows
     ts = api.transmit_state()
     ts.state = ts.START
-    response = api.set_transmit_state(ts)
-    assert(len(response.errors)) == 0
-
+    api.set_transmit_state(ts)
+    # create a query for flow metrics
+    req = api.metrics_request()
+    req.flow.flow_names = [flw.name]
+    # wait for flow metrics to be as expected
     while True:
-        req = api.metrics_request()
-        req.flow.flow_names = []
-        metrics = api.get_metrics(req).flow_metrics
-        if all([m.frames_tx == 10000 == m.frames_rx for m in metrics]):
+        res = api.get_metrics(req)
+        if all([m.frames_tx == 10000 == m.frames_rx for m in res.flow_metrics]):
             break
+    # get capture
+    cr = api.capture_request()
+    cr.port_name = rx.name
+    pcap_bytes = api.get_capture(cr)
+    # generate pcap in pwd
+    with open('out.pcap', 'wb') as out:
+        out.write(pcap_bytes.read())
