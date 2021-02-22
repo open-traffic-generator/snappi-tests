@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import time
+import dpkt
 
 
 if sys.version_info[0] >= 3:
@@ -75,6 +76,7 @@ class Settings(object):
         self.dynamic_stats_output = None
         self.license_servers = None
         self.ext = None
+        self.settings_file = SETTINGS_FILE
 
         self.load_from_settings_file()
 
@@ -86,13 +88,18 @@ class Settings(object):
             self.__dict__ = load_dict_from_json_file(custom)
 
     def get_settings_path(self):
-        return os.path.join(get_root_dir(), SETTINGS_FILE)
+        return os.path.join(get_root_dir(), self.settings_file)
 
     def register_pytest_command_line_options(self, parser):
         for key, val in object_dict_items(self):
             parser.addoption("--%s" % key, action="store", default=None)
+        parser.addoption("--settings_file", action="store", default=None)
 
     def load_from_pytest_command_line(self, config):
+        if config.getoption('settings_file'):
+            globals()['SETTINGS_FILE'] = config.getoption('settings_file')
+            self.settings_file = globals()['SETTINGS_FILE']
+            self.load_from_settings_file()
         for key, val in object_dict_items(self):
             new_val = config.getoption(key)
             if new_val is not None:
@@ -123,15 +130,20 @@ def get_ext():
     return settings.ext
 
 
-def start_traffic(api, cfg):
+def start_traffic(api, cfg, start_capture=True):
     """
     Applies configuration, and starts flows.
     """
     print('Setting config ...')
     response = api.set_config(cfg)
-    print_warnings(response.warnings)
     assert(len(response.errors)) == 0
 
+    capture_names = get_capture_port_names(cfg)
+    if capture_names and start_capture:
+        print('Starting capture on ports %s ...' % str(capture_names))
+        cs = api.capture_state()
+        cs.state = cs.START
+        api.set_capture_state(cs)
     print('Starting transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.START
@@ -293,3 +305,39 @@ def print_warnings(warnings):
         return
     for warning in warnings:
         print("Warning:", warning)
+
+
+def get_all_captures(api, cfg):
+    """
+    Returns a dictionary where port name is the key and value is a list of
+    frames where each frame is represented as a list of bytes.
+    """
+    cap_dict = {}
+    for name in get_capture_port_names(cfg):
+        print('Fetching captures from port %s' % name)
+        request = api.capture_request()
+        request.port_name = name
+        pcap_bytes = api.get_capture(request)
+
+        cap_dict[name] = []
+        for ts, pkt in dpkt.pcap.Reader(pcap_bytes):
+            if sys.version_info[0] == 2:
+                cap_dict[name].append([ord(b) for b in pkt])
+            else:
+                cap_dict[name].append(list(pkt))
+
+    return cap_dict
+
+
+def get_capture_port_names(cfg):
+    """
+    Returns name of ports for which capture is enabled.
+    """
+    names = []
+    for cap in cfg.captures:
+        if cap._properties.get('port_names'):
+            for name in cap.port_names:
+                if name not in names:
+                    names.append(name)
+
+    return names
