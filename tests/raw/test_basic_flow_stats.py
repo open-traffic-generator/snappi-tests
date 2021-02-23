@@ -55,7 +55,9 @@ def test_basic_flow_stats(settings):
     # wait for flow metrics to be as expected
     while True:
         res = api.get_metrics(req)
-        if all([m.frames_tx == 10000 == m.frames_rx for m in res.flow_metrics]):
+        if all(
+            [10000 == m.frames_rx for m in res.flow_metrics]
+        ):
             break
     # get capture
     cr = api.capture_request()
