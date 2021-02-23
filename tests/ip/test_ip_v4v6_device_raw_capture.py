@@ -39,6 +39,7 @@ def test_ip_v4v6_device_and_raw_capture(api, utils):
     l1.port_names = [tx.name, rx.name]
     l1.speed = utils.settings.speed
     l1.media = utils.settings.media
+    l1.promiscuous = utils.settings.promiscuous
 
     cap = config.captures.capture(name='c1')[-1]
     cap.port_names = [rx.name]
@@ -94,6 +95,8 @@ def test_ip_v4v6_device_and_raw_capture(api, utils):
     rx_ipv6.gateway.increment.start = src_ipv6
     rx_ipv6.gateway.increment.step = ipv6_step
     rx_ipv6.prefix.value = 48
+
+    # TODO Add protocol summary once it is supported
 
     # Flows configuration
     f1, f2, f3, f4 = (
