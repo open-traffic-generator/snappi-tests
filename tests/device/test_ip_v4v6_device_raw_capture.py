@@ -1,27 +1,21 @@
 import pytest
-import snappi
 
 
-@pytest.fixture
-def app_intf(utils):
-    api = snappi.api(host=utils.settings.api_server, ext=utils.settings.ext)
-    yield api
-    if getattr(api, 'assistant', None) is not None:
-        api.assistant.Session.remove()
-
-
-@pytest.mark.skip_if_athena
-def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
+@pytest.mark.device
+def test_ip_v4v6_device_and_raw_capture(api, utils):
     """
-    Test to demonstrate ipv4 and ipv6 device and raw type traffic
-    configuration, transmit, statistics and capture.
+    Configure ipv4 and ipv6 dual stack devices, then configure flows for
+    devices and create raw ipv4 and ipv6 flows which will be.
+    validation:
+    verify the flows transmission from tx to rx with no loss.
+    verify mac and ipv4/ipv6 on each packet captured.
     """
-    config = app_intf.config()
+    config = api.config()
 
     size = 128
     packets = 1000
-    src = '00:10:10:20:20:10'
-    dst = '00:10:10:20:20:20'
+    src_mac = '00:10:10:20:20:10'
+    dst_mac = '00:10:10:20:20:20'
     mac_step = '00:00:00:00:00:01'
 
     src_ipv4 = '10.1.1.1'
@@ -32,9 +26,9 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     dst_ipv6 = 'abcd::2a'
     ipv6_step = '1::'
 
-    ##############################
+    count = 10
+
     # Ports configuration
-    ##############################
     tx, rx = (
         config.ports
         .port(name='tx', location=utils.settings.ports[0])
@@ -50,23 +44,21 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     cap.port_names = [rx.name]
     cap.format = cap.PCAP
 
-    ##############################
     # Device configuration
-    ##############################
     tx_dev, rx_dev = config.devices.device().device()
     tx_dev.name = 'tx_dev'
     rx_dev.name = 'rx_dev'
     tx_dev.container_name = tx.name
     rx_dev.container_name = rx.name
-    tx_dev.device_count = 10
-    rx_dev.device_count = 10
+    tx_dev.device_count = count
+    rx_dev.device_count = count
     tx_eth = tx_dev.ethernet
     rx_eth = rx_dev.ethernet
-
+    # Ethernet configuration
     tx_eth.name = "tx_eth"
-    tx_eth.mac.increment.start = src
+    tx_eth.mac.increment.start = src_mac
     tx_eth.mac.increment.step = mac_step
-
+    # Ipv4 configuration
     tx_ipv4 = tx_eth.ipv4
     tx_ipv4.name = "tx_ipv4"
     tx_ipv4.address.increment.start = src_ipv4
@@ -74,6 +66,7 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     tx_ipv4.gateway.increment.start = dst_ipv4
     tx_ipv4.gateway.increment.step = ipv4_step
     tx_ipv4.prefix.value = 24
+    # Ipv6 configuration
     tx_ipv6 = tx_eth.ipv6
     tx_ipv6.name = "tx_ipv6"
     tx_ipv6.address.increment.start = src_ipv6
@@ -81,11 +74,11 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     tx_ipv6.gateway.increment.start = dst_ipv6
     tx_ipv6.gateway.increment.step = ipv6_step
     tx_ipv6.prefix.value = 48
-
+    # Ethernet configuration
     rx_eth.name = "rx_eth"
-    rx_eth.mac.decrement.start = dst
+    rx_eth.mac.decrement.start = dst_mac
     rx_eth.mac.decrement.step = mac_step
-
+    # Ipv4 configuration
     rx_ipv4 = rx_eth.ipv4
     rx_ipv4.name = "rx_ipv4"
     rx_ipv4.address.increment.start = dst_ipv4
@@ -93,6 +86,7 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     rx_ipv4.gateway.increment.start = src_ipv4
     rx_ipv4.gateway.increment.step = ipv4_step
     rx_ipv4.prefix.value = 24
+    # Ipv6 configuration
     rx_ipv6 = rx_eth.ipv6
     rx_ipv6.name = "rx_ipv6"
     rx_ipv6.address.increment.start = dst_ipv6
@@ -101,9 +95,7 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     rx_ipv6.gateway.increment.step = ipv6_step
     rx_ipv6.prefix.value = 48
 
-    ##############################
     # Flows configuration
-    ##############################
     f1, f2, f3, f4 = (
         config.flows
         .flow(name='FlowIpv4Device')
@@ -128,18 +120,21 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     f3.packet.ethernet().ipv4()
     eth = f3.packet[0]
     ipv4 = f3.packet[1]
-    eth.src.increment.start = src
+    # Ethernet header configuration
+    eth.src.increment.start = src_mac
     eth.src.increment.step = mac_step
-    eth.src.increment.count = 10
-    eth.dst.decrement.start = dst
+    eth.src.increment.count = count
+    eth.dst.decrement.start = dst_mac
     eth.dst.decrement.step = mac_step
-    eth.dst.decrement.count = 10
+    eth.dst.decrement.count = count
+    # Ipv4 header configuration
     ipv4.src.increment.start = src_ipv4
     ipv4.src.increment.step = ipv4_step
-    ipv4.src.increment.count = 10
+    ipv4.src.increment.count = count
     ipv4.dst.increment.start = dst_ipv4
     ipv4.dst.increment.step = ipv4_step
-    ipv4.dst.increment.count = 10
+    ipv4.dst.increment.count = count
+
     f3.size.fixed = size
     f3.duration.fixed_packets.packets = packets
 
@@ -148,42 +143,37 @@ def test_ip_v4v6_device_and_raw_capture(app_intf, utils):
     f4.packet.ethernet().ipv6()
     eth = f4.packet[0]
     ipv6 = f4.packet[1]
-    eth.src.increment.start = src
+    # Ethernet header configuration
+    eth.src.increment.start = src_mac
     eth.src.increment.step = mac_step
-    eth.src.increment.count = 10
-    eth.dst.decrement.start = dst
+    eth.src.increment.count = count
+    eth.dst.decrement.start = dst_mac
     eth.dst.decrement.step = mac_step
-    eth.dst.decrement.count = 10
+    eth.dst.decrement.count = count
+    # Ipv6 header configuration
     ipv6.src.increment.start = src_ipv6
     ipv6.src.increment.step = ipv6_step
-    ipv6.src.increment.count = 10
+    ipv6.src.increment.count = count
     ipv6.dst.increment.start = dst_ipv6
     ipv6.dst.increment.step = ipv6_step
-    ipv6.dst.increment.count = 10
+    ipv6.dst.increment.count = count
     f4.size.fixed = size
     f4.duration.fixed_packets.packets = packets
 
-    ##############################
     # Starting transmit on flows
-    ##############################
-    utils.start_traffic(app_intf, config)
+    utils.start_traffic(api, config)
 
-    ##############################
-    # Analyzing Traffic metrics
-    ##############################
     print('Analyzing flow and port metrics ...')
     utils.wait_for(
-        lambda: results_ok(app_intf, utils, size, packets * 4),
+        lambda: results_ok(api, utils, size, packets * 4),
         'stats to be as expected', timeout_seconds=10
     )
 
-    ##############################
-    # Stopping transmit on flows
-    ##############################
     print('Stopping transmit ...')
-    utils.stop_traffic(app_intf, config)
+    utils.stop_traffic(api, config)
 
-    captures_ok(app_intf, config, utils, packets * 4)
+    print('Capture validation ...')
+    captures_ok(api, config, utils, size, packets * 4)
 
 
 def results_ok(api, utils, size, packets):
@@ -198,7 +188,7 @@ def results_ok(api, utils, size, packets):
     return frames_ok and bytes_ok
 
 
-def captures_ok(api, cfg, utils, packets):
+def captures_ok(api, cfg, utils, size, packets):
     """
     Returns normally if patterns in captured packets are as expected.
     """
@@ -223,15 +213,15 @@ def captures_ok(api, cfg, utils, packets):
 
     cap_dict = utils.get_all_captures(api, cfg)
     assert len(cap_dict) == 1
-    size = 128
     size_dt = {
-        128: [0 for i in range(10)]
+        size: [0 for i in range(10)]
     }
 
     for index, b in enumerate(cap_dict[list(cap_dict.keys())[0]]):
         try:
             i = dst_mac.index(b[0:6])
         except Exception:
+            # To avoid packets that are not generated by configured flows
             continue
         assert b[0:6] == dst_mac[i] and b[6:12] == src_mac[i]
         if b[14] == 0x45:
@@ -241,4 +231,4 @@ def captures_ok(api, cfg, utils, packets):
         assert len(b) == size
         size_dt[len(b)][i] += 1
 
-    assert sum(size_dt[128]) == packets
+    assert sum(size_dt[size]) == packets

@@ -76,6 +76,7 @@ class Settings(object):
         self.dynamic_stats_output = None
         self.license_servers = None
         self.ext = None
+        self.promiscuous = None
         self.settings_file = SETTINGS_FILE
 
         self.load_from_settings_file()
@@ -93,12 +94,13 @@ class Settings(object):
     def register_pytest_command_line_options(self, parser):
         for key, val in object_dict_items(self):
             parser.addoption("--%s" % key, action="store", default=None)
-        parser.addoption("--settings_file", action="store", default=None)
+        parser.addoption("--settings", action="store", default=None)
 
     def load_from_pytest_command_line(self, config):
-        if config.getoption('settings_file'):
-            globals()['SETTINGS_FILE'] = config.getoption('settings_file')
-            self.settings_file = globals()['SETTINGS_FILE']
+        if config.getoption('settings'):
+            global SETTINGS_FILE
+            SETTINGS_FILE = config.getoption('settings')
+            self.settings_file = SETTINGS_FILE
             self.load_from_settings_file()
         for key, val in object_dict_items(self):
             new_val = config.getoption(key)

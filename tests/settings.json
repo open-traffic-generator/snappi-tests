@@ -12,5 +12,6 @@
     "interval_seconds": 0.5,
     "log_level": "info",
     "dynamic_stats_output": false,
-    "license_servers": []
+    "license_servers": [],
+    "promiscuous": true
 }
