@@ -1,4 +1,3 @@
-from tests.convergence.bgp_convergence_config import bgp_convergence_config
 import pytest
 
 
@@ -11,7 +10,7 @@ def test_bgp_dp_dp_convergence(api, utils, bgp_convergence_config):
     8. Obtain tx frames and rx frames from stats and calculate
        dp/dp convergence
     """
-
+    api.set_config(api.config())
     response = api.set_config(bgp_convergence_config)
     assert(len(response.errors)) == 0
     # name of the port that should be shutdown to trigger withdraw route

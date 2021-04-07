@@ -14,6 +14,7 @@ def test_basic_flow_stats(settings):
     api = snappi.api(host=settings.api_server, ext=settings.ext)
 
     config = api.config()
+    api.set_config(config)
     tx, rx = (
         config.ports
         .port(name='tx', location=settings.ports[0])

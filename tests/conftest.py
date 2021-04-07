@@ -33,9 +33,38 @@ def api():
     if getattr(api, 'assistant', None) is not None:
         api.assistant.Session.remove()
 
+
 @pytest.fixture
-def b2b_raw_config():
-    return utl.get_b2b_raw_config()
+def b2b_raw_config(api):
+    """
+    back to back raw config
+    """
+    config = api.config()
+
+    tx, rx = (
+        config.ports
+        .port(name='tx', location=utl.settings.ports[0])
+        .port(name='rx', location=utl.settings.ports[1])
+    )
+
+    l1 = config.layer1.layer1()[0]
+    l1.name = 'l1'
+    l1.port_names = [rx.name, tx.name]
+    l1.media = utl.settings.media
+    l1.speed = utl.settings.speed
+
+    flow = config.flows.flow(name='f1')[-1]
+    flow.tx_rx.port.tx_name = tx.name
+    flow.tx_rx.port.rx_name = rx.name
+
+    # this will allow us to take over ports that may already be in use
+    config.options.port_options.location_preemption = True
+
+    cap = config.captures.capture(name='c1')[-1]
+    cap.port_names = [rx.name]
+    cap.format = cap.PCAP
+
+    return config
 
 
 @pytest.fixture
@@ -56,3 +85,7 @@ def rx_addr():
     """
     return utl.settings.ports[1]
 
+
+@pytest.fixture
+def bgp_convergence_config(api, utils):
+    return utils.bgp_convergence_config(api, utils)

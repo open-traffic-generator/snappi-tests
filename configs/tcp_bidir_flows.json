@@ -9,6 +9,13 @@
       "name": "rx"
     }
   ],
+  "layer1": [
+    {
+      "media": "fiber",
+      "port_names": ["tx", "rx"],
+      "speed": "speed_1_gbps"
+    }
+  ],
   "flows": [
     {
       "name": "tx_flow",

@@ -1,6 +1,4 @@
-
-
-def test_tcp_unidir_flows(api, utils):
+def test_tcp_flow_capture(api, b2b_raw_config, utils):
     """
     Configure a raw TCP flow with,
     - list of 6 src ports and 3 dst ports
@@ -8,30 +6,12 @@ def test_tcp_unidir_flows(api, utils):
     - 10% line rate
     Validate,
     - tx/rx frame count and bytes are as expected
+    - all captured frames have expected src and dst ports
     """
-    config = api.config()
+    size = 1518
+    packets = 100
 
-    tx, rx = (
-        config.ports
-        .port(name='tx', location=utils.settings.ports[0])
-        .port(name='rx', location=utils.settings.ports[1])
-    )
-
-    ly = config.layer1.layer1()[-1]
-    ly.name = 'ly'
-    ly.port_names = [tx.name, rx.name]
-    ly.media = utils.settings.media
-    ly.speed = utils.settings.speed
-
-    flow = config.flows.flow(name='tx_flow')[-1]
-    flow.tx_rx.port.tx_name = tx.name
-    flow.tx_rx.port.rx_name = rx.name
-
-    size = 128
-    packets = 1000
-    flow.size.fixed = size
-    flow.duration.fixed_packets.packets = packets
-
+    flow = b2b_raw_config.flows[0]
     eth, ip, tcp = flow.packet.ethernet().ipv4().tcp()
 
     eth.src.value = '00:CD:DC:CD:DC:CD'
@@ -43,14 +23,16 @@ def test_tcp_unidir_flows(api, utils):
     tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
     tcp.dst_port.values = ['6000', '6015', '6050']
 
-    # this will allow us to take over ports that may already be in use
-    config.options.port_options.location_preemption = True
+    flow.duration.fixed_packets.packets = packets
+    flow.size.fixed = size
+    flow.rate.percentage = 10
 
-    utils.start_traffic(api, config, False)
+    utils.start_traffic(api, b2b_raw_config)
     utils.wait_for(
         lambda: results_ok(api, utils, size, packets),
         'stats to be as expected', timeout_seconds=10
     )
+    captures_ok(api, b2b_raw_config, utils, size)
 
 
 def results_ok(api, utils, size, packets):
@@ -61,3 +43,26 @@ def results_ok(api, utils, size, packets):
     frames_ok = utils.total_frames_ok(port_results, flow_results, packets)
     bytes_ok = utils.total_bytes_ok(port_results, flow_results, packets * size)
     return frames_ok and bytes_ok
+
+
+def captures_ok(api, cfg, utils, size):
+    """
+    Returns normally if patterns in captured packets are as expected.
+    """
+    src = [
+        [0x13, 0x88], [0x13, 0xBA], [0x13, 0x97], [0x13, 0xB0], [0x13, 0xA8],
+        [0x13, 0x9D]
+    ]
+    dst = [[0x17, 0x70], [0x17, 0x7F], [0x17, 0xA2]]
+
+    cap_dict = utils.get_all_captures(api, cfg)
+    assert len(cap_dict) == 1
+
+    for k in cap_dict:
+        i = 0
+        j = 0
+        for b in cap_dict[k]:
+            assert b[34:36] == src[i] and b[36:38] == dst[j]
+            i = (i + 1) % 6
+            j = (j + 1) % 3
+            assert len(b) == size
