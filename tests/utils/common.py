@@ -137,20 +137,18 @@ def start_traffic(api, cfg, start_capture=True):
     Applies configuration, and starts flows.
     """
     print('Setting config ...')
-    response = api.set_config(cfg)
-    assert(len(response.errors)) == 0
+    assert_response(api.set_config(cfg))
     capture_names = get_capture_port_names(cfg)
     if capture_names and start_capture:
         print('Starting capture on ports %s ...' % str(capture_names))
         cs = api.capture_state()
         cs.state = cs.START
-        api.set_capture_state(cs)
+        assert_response(api.set_capture_state(cs))
+
     print('Starting transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.START
-    response = api.set_transmit_state(ts)
-    print_warnings(response.warnings)
-    assert(len(response.errors)) == 0
+    assert_response(api.set_transmit_state(ts))
 
 
 def stop_traffic(api, cfg=None, stop_capture=True):
@@ -160,9 +158,7 @@ def stop_traffic(api, cfg=None, stop_capture=True):
     print('Stopping transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.STOP
-    response = api.set_transmit_state(ts)
-    print(response.warnings)
-    assert(len(response.errors)) == 0
+    assert_response(api.set_transmit_state(ts))
     if cfg is None:
         return
     capture_names = get_capture_port_names(cfg)
@@ -170,7 +166,7 @@ def stop_traffic(api, cfg=None, stop_capture=True):
         print('Stopping capture on ports %s ...' % str(capture_names))
         cs = api.capture_state()
         cs.state = cs.STOP
-        api.set_capture_state(cs)
+        assert_response(api.set_capture_state(cs))
 
 
 def seconds_elapsed(start_seconds):
@@ -308,11 +304,10 @@ def print_stats(port_stats=None, flow_stats=None, clear_screen=None):
         print("")
 
 
-def print_warnings(warnings):
-    if warnings is None:
-        return
-    for warning in warnings:
-        print("Warning:", warning)
+def assert_response(response):
+    assert (len(response.errors)) == 0, response.errors
+    if response.warnings:
+        print('Warning: %s' % str(response.warnings))
 
 
 def get_all_captures(api, cfg):
