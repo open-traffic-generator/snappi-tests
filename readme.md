@@ -25,7 +25,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
   python -m pip install --upgrade -r requirements.txt
   ```
 
-- Update `settings.json`
+- Update `tests/settings.json`
 
   ```sh
   # sample for athena testbed
@@ -37,6 +37,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
         "localhost:5555",
         "localhost:5556"
     ],
+    # since we're not using any snappi extension
     "ext": null,
     "speed": "speed_1_gbps",
     "media": null
@@ -50,7 +51,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
         "192.168.2.1;6;1",
         "192.168.2.1;6;2"
     ],
-    # snappi extension to use
+    # since we're using snappi ixnetwork extension
     "ext": "ixnetwork",
     "speed": "speed_1_gbps",
     "media": "fiber"
