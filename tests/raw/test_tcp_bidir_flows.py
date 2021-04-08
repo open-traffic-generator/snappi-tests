@@ -10,6 +10,7 @@ def test_tcp_bidir_flows(api, utils):
     - tx/rx frame count and bytes are as expected
     """
     config = api.config()
+    api.set_config(config)
     # load JSON config from configs/
     with open(utils.get_test_config_path('tcp_bidir_flows.json')) as f:
         config.deserialize(f.read())
@@ -24,7 +25,7 @@ def test_tcp_bidir_flows(api, utils):
     size = config.flows[0].size.fixed
     packets = config.flows[0].duration.fixed_packets.packets
 
-    utils.start_traffic(api, config)
+    utils.start_traffic(api, config, False)
 
     utils.wait_for(
         lambda: results_ok(api, utils, size, packets * 2),

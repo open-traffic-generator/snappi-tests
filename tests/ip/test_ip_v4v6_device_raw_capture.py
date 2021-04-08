@@ -26,7 +26,7 @@ def test_ip_v4v6_device_and_raw_capture(api, utils):
     dst_ipv6 = 'abcd::2a'
     ipv6_step = '1::'
 
-    count = 10
+    count = 1
 
     # Ports configuration
     tx, rx = (
@@ -51,50 +51,38 @@ def test_ip_v4v6_device_and_raw_capture(api, utils):
     rx_dev.name = 'rx_dev'
     tx_dev.container_name = tx.name
     rx_dev.container_name = rx.name
-    tx_dev.device_count = count
-    rx_dev.device_count = count
     tx_eth = tx_dev.ethernet
     rx_eth = rx_dev.ethernet
     # Ethernet configuration
     tx_eth.name = "tx_eth"
-    tx_eth.mac.increment.start = src_mac
-    tx_eth.mac.increment.step = mac_step
+    tx_eth.mac = src_mac
     # Ipv4 configuration
     tx_ipv4 = tx_eth.ipv4
     tx_ipv4.name = "tx_ipv4"
-    tx_ipv4.address.increment.start = src_ipv4
-    tx_ipv4.address.increment.step = ipv4_step
-    tx_ipv4.gateway.increment.start = dst_ipv4
-    tx_ipv4.gateway.increment.step = ipv4_step
-    tx_ipv4.prefix.value = 24
+    tx_ipv4.address = src_ipv4
+    tx_ipv4.gateway = dst_ipv4
+    tx_ipv4.prefix = 24
     # Ipv6 configuration
     tx_ipv6 = tx_eth.ipv6
     tx_ipv6.name = "tx_ipv6"
-    tx_ipv6.address.increment.start = src_ipv6
-    tx_ipv6.address.increment.step = ipv6_step
-    tx_ipv6.gateway.increment.start = dst_ipv6
-    tx_ipv6.gateway.increment.step = ipv6_step
-    tx_ipv6.prefix.value = 48
+    tx_ipv6.address = src_ipv6
+    tx_ipv6.gateway = dst_ipv6
+    tx_ipv6.prefix = 48
     # Ethernet configuration
     rx_eth.name = "rx_eth"
-    rx_eth.mac.decrement.start = dst_mac
-    rx_eth.mac.decrement.step = mac_step
+    rx_eth.mac = dst_mac
     # Ipv4 configuration
     rx_ipv4 = rx_eth.ipv4
     rx_ipv4.name = "rx_ipv4"
-    rx_ipv4.address.increment.start = dst_ipv4
-    rx_ipv4.address.increment.step = ipv4_step
-    rx_ipv4.gateway.increment.start = src_ipv4
-    rx_ipv4.gateway.increment.step = ipv4_step
-    rx_ipv4.prefix.value = 24
+    rx_ipv4.address = dst_ipv4
+    rx_ipv4.gateway = src_ipv4
+    rx_ipv4.prefix = 24
     # Ipv6 configuration
     rx_ipv6 = rx_eth.ipv6
     rx_ipv6.name = "rx_ipv6"
-    rx_ipv6.address.increment.start = dst_ipv6
-    rx_ipv6.address.increment.step = ipv6_step
-    rx_ipv6.gateway.increment.start = src_ipv6
-    rx_ipv6.gateway.increment.step = ipv6_step
-    rx_ipv6.prefix.value = 48
+    rx_ipv6.address = dst_ipv6
+    rx_ipv6.gateway = src_ipv6
+    rx_ipv6.prefix = 48
 
     # TODO Add protocol summary once it is supported
 

@@ -6,11 +6,16 @@ This repository consists of end-to-end test scripts written in [snappi](https://
 
 Please make sure that the client setup meets [Python Prerequisites](#python-prerequisites).
 
+>This repository is currently work-in-progress, and hence only the tests inside `tests/raw` have been tested against both `athena` and `IxNetwork`.
+
 - Clone this project, `cd` inside it.
 
-- Install `snappi` with IxNetwork extension.
+- Install `snappi` (along with extensions if needed).
 
   ```sh
+  # if no extensions are needed - e.g. for athena testbed
+  python -m pip install --upgrade snappi
+  # install with ixnetwork extension - for ixnetwork testbed
   python -m pip install --upgrade "snappi[ixnetwork]"
   ```
 
@@ -20,13 +25,42 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
   python -m pip install --upgrade -r requirements.txt
   ```
 
+- Update `settings.json`
+
+  ```sh
+  # sample for athena testbed
+  {
+    # controller address
+    "api_server": "https://localhost",
+    "ports": [
+        # traffic engine addresses 
+        "localhost:5555",
+        "localhost:5556"
+    ],
+    "ext": null,
+    "speed": "speed_1_gbps",
+    "media": null
+  }
+  # sample for ixnetwork testbed
+  {
+    # IxNetwork API Server address
+    "api_server": "https://192.168.1.1:443",
+    "ports": [
+        # chassis;card;port
+        "192.168.2.1;6;1",
+        "192.168.2.1;6;2"
+    ],
+    # snappi extension to use
+    "ext": "ixnetwork",
+    "speed": "speed_1_gbps",
+    "media": "fiber"
+  }
+  ```
+
 - Run Tests.
 
   ```sh
-  # provide intended API Server and port addresses
-  vi tests/settings.json
-  # run a test
-  python -m pytest tests/raw/test_tcp_unidir_flows.py
+  python -m pytest tests/raw/test_basic_flow_stats.py
   ```
 
 #### Python Prerequisites

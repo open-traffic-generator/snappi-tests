@@ -137,34 +137,36 @@ def start_traffic(api, cfg, start_capture=True):
     Applies configuration, and starts flows.
     """
     print('Setting config ...')
-    response = api.set_config(cfg)
-    assert(len(response.errors)) == 0
-
+    assert_response(api.set_config(cfg))
     capture_names = get_capture_port_names(cfg)
     if capture_names and start_capture:
         print('Starting capture on ports %s ...' % str(capture_names))
         cs = api.capture_state()
         cs.state = cs.START
-        api.set_capture_state(cs)
+        assert_response(api.set_capture_state(cs))
+
     print('Starting transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.START
-    response = api.set_transmit_state(ts)
-    print_warnings(response.warnings)
-    assert(len(response.errors)) == 0
+    assert_response(api.set_transmit_state(ts))
 
 
-def stop_traffic(api):
+def stop_traffic(api, cfg=None, stop_capture=True):
     """
     Stops flows
     """
-
-    print('Stop transmit on all flows ...')
+    print('Stopping transmit on all flows ...')
     ts = api.transmit_state()
     ts.state = ts.STOP
-    response = api.set_transmit_state(ts)
-    print_warnings(response.warnings)
-    assert(len(response.errors)) == 0
+    assert_response(api.set_transmit_state(ts))
+    if cfg is None:
+        return
+    capture_names = get_capture_port_names(cfg)
+    if capture_names and stop_capture:
+        print('Stopping capture on ports %s ...' % str(capture_names))
+        cs = api.capture_state()
+        cs.state = cs.STOP
+        assert_response(api.set_capture_state(cs))
 
 
 def seconds_elapsed(start_seconds):
@@ -302,11 +304,10 @@ def print_stats(port_stats=None, flow_stats=None, clear_screen=None):
         print("")
 
 
-def print_warnings(warnings):
-    if warnings is None:
-        return
-    for warning in warnings:
-        print("Warning:", warning)
+def assert_response(response):
+    assert (len(response.errors)) == 0, response.errors
+    if response.warnings:
+        print('Warning: %s' % str(response.warnings))
 
 
 def get_all_captures(api, cfg):
@@ -343,3 +344,62 @@ def get_capture_port_names(cfg):
                     names.append(name)
 
     return names
+
+
+def mac_or_ip_to_num(mac_or_ip_addr, mac=True):
+    """
+    Example:
+    mac_or_ip_to_num('00:0C:29:E3:53:EA')
+    returns: 52242371562
+    mac_or_ip_to_num('10.1.1.1', False)
+    returns: 167837953
+    """
+    sep = ':' if mac else '.'
+    addr = []
+    if mac:
+        addr = mac_or_ip_addr.split(sep)
+    else:
+        addr = ["{:02x}".format(int(i)) for i in mac_or_ip_addr.split(sep)]
+    return int("".join(addr), 16)
+
+
+def num_to_mac_or_ip(mac_or_ip_addr, mac=True):
+    """
+    Example:
+    num_to_mac_or_ip(52242371562)
+    returns: '00:0C:29:E3:53:EA'
+    num_to_mac_or_ip(167837953, False)
+    returns: '10.1.1.1'
+    """
+    sep = ':' if mac else '.'
+    fmt = '{:012x}' if mac else '{:08x}'
+    rng = 12 if mac else 8
+    mac_or_ip = fmt.format(mac_or_ip_addr)
+    addr = []
+    for i in range(0, rng, 2):
+        if mac:
+            addr.append(mac_or_ip[i] + mac_or_ip[i + 1])
+        else:
+            addr.append(str(int(mac_or_ip[i] + mac_or_ip[i + 1], 16)))
+    return sep.join(addr)
+
+
+def mac_or_ip_addr_from_counter_pattern(start_addr, step, count, up, mac=True):
+    """
+    Example:
+    mac_or_ip_addr_from_counter_pattern('10.1.1.1', '0.0.1.1', 2, True, False)
+    returns: ['00:0C:29:E3:53:EA', '00:0C:29:E3:54:EA']
+    mac_or_ip_addr_from_counter_pattern('10.1.1.1', '0.0.1.1', 2, True, False)
+    teturns: ['10.1.1.1', '10.1.2.2']
+    """
+    addr_list = []
+    for num in range(count):
+        addr_list.append(start_addr)
+        if up:
+            start_addr = mac_or_ip_to_num(
+                start_addr, mac) + mac_or_ip_to_num(step, mac)
+        else:
+            start_addr = mac_or_ip_to_num(
+                start_addr, mac) - mac_or_ip_to_num(step, mac)
+        start_addr = num_to_mac_or_ip(start_addr, mac)
+    return addr_list
