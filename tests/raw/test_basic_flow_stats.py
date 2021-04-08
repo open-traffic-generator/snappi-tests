@@ -37,7 +37,7 @@ def test_basic_flow_stats(settings):
     # configure rate, size, frame count
     flw.size.fixed = 128
     flw.rate.pps = 1000
-    flw.duration.fixed_packets.packets = 10000
+    flw.duration.fixed_packets.packets = 1000
     # configure protocol headers with defaults fields
     flw.packet.ethernet().vlan().ipv4().tcp()
     # push configuration
@@ -57,7 +57,7 @@ def test_basic_flow_stats(settings):
     while True:
         res = api.get_metrics(req)
         if all(
-            [10000 == m.frames_rx for m in res.flow_metrics]
+            [1000 == m.frames_rx for m in res.flow_metrics]
         ):
             break
     # get capture

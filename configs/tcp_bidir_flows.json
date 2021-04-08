@@ -1,11 +1,11 @@
 {
   "ports": [
     {
-      "location": "localhost;1;1",
+      "location": "localhost:5555",
       "name": "tx"
     },
     {
-      "location": "localhost;1;2",
+      "location": "localhost:5556",
       "name": "rx"
     }
   ],
@@ -66,11 +66,11 @@
         {
           "tcp": {
             "src_port": {
-              "values": ["5000", "5050", "5015", "5040", "5032", "5021"],
+              "values": [5000, 5050, 5015, 5040, 5032, 5021],
               "choice": "values"
             },
             "dst_port": {
-              "values": ["6000", "6015", "6050"],
+              "values": [6000, 6015, 6050],
               "choice": "values"
             }
           },
@@ -127,11 +127,11 @@
         {
           "tcp": {
             "src_port": {
-              "values": ["5000", "5050", "5015", "5040", "5032", "5021"],
+              "values": [5000, 5050, 5015, 5040, 5032, 5021],
               "choice": "values"
             },
             "dst_port": {
-              "values": ["6000", "6015", "6050"],
+              "values": [6000, 6015, 6050],
               "choice": "values"
             }
           },

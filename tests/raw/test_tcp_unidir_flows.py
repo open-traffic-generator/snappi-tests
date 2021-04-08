@@ -40,8 +40,8 @@ def test_tcp_unidir_flows(api, utils):
     ip.src.value = '1.1.1.2'
     ip.dst.value = '1.1.1.1'
 
-    tcp.src_port.values = ['5000', '5050', '5015', '5040', '5032', '5021']
-    tcp.dst_port.values = ['6000', '6015', '6050']
+    tcp.src_port.values = [5000, 5050, 5015, 5040, 5032, 5021]
+    tcp.dst_port.values = [6000, 6015, 6050]
 
     # this will allow us to take over ports that may already be in use
     config.options.port_options.location_preemption = True
