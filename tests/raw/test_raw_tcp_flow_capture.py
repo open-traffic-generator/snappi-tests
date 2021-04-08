@@ -23,9 +23,9 @@ def test_raw_tcp_flow_capture(api, utils):
     dst_ipv6 = 'abcd::2a'
     ipv6_step = '1::'
 
-    src_tcp = '5000'
-    dst_tcp = '2000'
-    tcp_step = '1'
+    src_tcp = 5000
+    dst_tcp = 2000
+    tcp_step = 1
 
     count = 10
 
