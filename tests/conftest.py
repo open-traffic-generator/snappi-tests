@@ -86,6 +86,7 @@ def rx_addr():
     return utl.settings.ports[1]
 
 
-@pytest.fixture
-def bgp_convergence_config(api, utils):
-    return utils.bgp_convergence_config(api, utils)
+# @pytest.fixture
+# def bgp_convergence_config(api, utils):
+#     from 
+#     return utils.bgp_convergence_config(api, utils)

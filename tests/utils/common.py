@@ -403,3 +403,21 @@ def mac_or_ip_addr_from_counter_pattern(start_addr, step, count, up, mac=True):
                 start_addr, mac) - mac_or_ip_to_num(step, mac)
         start_addr = num_to_mac_or_ip(start_addr, mac)
     return addr_list
+
+
+def flow_transmit_matches(flow_results, state):
+    return len(flow_results) == all(
+        [f.transmit == state for f in flow_results]
+    )
+
+
+def to_hex(lst):
+    """
+    Takes lst of data from packet capture and converts to hex
+    Ex: [11,184] is converted to 0xbb8
+        [0,30] is converted to 0x1e
+    """
+    from functools import reduce
+    value = reduce(lambda x, y: hex(x) + hex(y), lst)
+    value = value[0:2] + value[2:].replace("0x", "").lstrip("0")
+    return value

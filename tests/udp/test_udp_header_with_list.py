@@ -1,8 +1,7 @@
-def test_udp_header_with_counter_e2e(api, b2b_raw_config, utils):
+def test_udp_header_with_list(api, b2b_raw_config, utils):
     """
     Configure a raw udp flow with,
-    - Non-default Counter Pattern values of src and
-      dst Port address, length, checksum
+    - Non-default list values of src and dst Port address, length, checksum
     - 100 frames of 74B size each
     - 10% line rate
 
@@ -20,15 +19,9 @@ def test_udp_header_with_counter_e2e(api, b2b_raw_config, utils):
     eth.dst.value = '00:0c:29:1d:10:71'
     ip.src.value = '10.10.10.1'
     ip.dst.value = '10.10.10.2'
-    udp.src_port.increment.start = 5000
-    udp.src_port.increment.step = 2
-    udp.src_port.increment.count = 10
-    udp.dst_port.decrement.start = 6000
-    udp.dst_port.decrement.step = 2
-    udp.dst_port.decrement.count = 10
-    udp.length.increment.start = 35
-    udp.length.increment.step = 1
-    udp.length.increment.count = 2
+    udp.src_port.values = ['3000', '3001']
+    udp.dst_port.values = ["4000", "4001"]
+    udp.length.values = ["35", "36"]
     udp.checksum.GOOD
     flow.duration.fixed_packets.packets = packets
     flow.size.fixed = size
@@ -57,19 +50,17 @@ def captures_ok(api, cfg, size, utils):
     """
     Returns normally if patterns in captured packets are as expected.
     """
-    src = [src_port for src_port in range(5000, 5020, 2)]
-    dst = [dst_port for dst_port in range(6000, 5980, -2)]
+    src = [3000, 3001]
+    dst = [4000, 4001]
     length = [35, 36]
     cap_dict = utils.get_all_captures(api, cfg)
     assert len(cap_dict) == 1
 
     for k in cap_dict:
-        i = 0
-        j = 0
+        packet_num = 0
         for packet in cap_dict[k]:
-            assert utils.to_hex(packet[34:36]) == hex(src[i])
-            assert utils.to_hex(packet[36:38]) == hex(dst[i])
-            assert utils.to_hex(packet[38:40]) == hex(length[j])
+            assert utils.to_hex(packet[34:36]) == hex(src[packet_num])
+            assert utils.to_hex(packet[36:38]) == hex(dst[packet_num])
+            assert utils.to_hex(packet[38:40]) == hex(length[packet_num])
             assert len(packet) == size
-            i = (i + 1) % 10
-            j = (j + 1) % 2
+            packet_num = (packet_num + 1) % 2

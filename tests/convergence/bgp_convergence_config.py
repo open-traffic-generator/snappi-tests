@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.fixture
 def bgp_convergence_config(api, utils):
     """
     1.Configure IPv4 EBGP sessions between Keysight ports
@@ -21,6 +25,7 @@ def bgp_convergence_config(api, utils):
     ly.ieee_media_defaults = False
     ly.auto_negotiate = False
     ly.speed = utils.settings.speed
+    ly.media = utils.settings.media
 
     tx_device, rx1_device, rx2_device = (
         config.devices
