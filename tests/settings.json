@@ -1,13 +1,14 @@
 {
     "username": "common",
-    "api_server": "https://localhost",
+    "api_server": "https://10.39.71.172:11009",
     "ports": [
-        "localhost:5555",
-        "localhost:5556"
+        "10.39.68.149;1;3",
+        "10.39.68.149;1;4",
+        "10.39.68.149;1;5"
     ],
-    "ext": null,
-    "speed": "speed_1_gbps",
-    "media": null,
+    "ext": "ixnetwork",
+    "speed": "speed_100_gbps",
+    "media": "fiber",
     "timeout_seconds": 30,
     "interval_seconds": 0.5,
     "log_level": "info",
