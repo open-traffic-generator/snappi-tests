@@ -1,4 +1,5 @@
 import pytest
+from .bgp_convergence_config import *
 
 
 @pytest.mark.dut

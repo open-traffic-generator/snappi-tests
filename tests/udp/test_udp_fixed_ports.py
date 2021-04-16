@@ -1,4 +1,4 @@
-def test_udp_fixed_ports_e2e(api, b2b_raw_config, utils):
+def test_udp_fixed_ports(api, b2b_raw_config, utils):
     """
     Configure a raw udp flow with,
     - fixed src and dst Port address
