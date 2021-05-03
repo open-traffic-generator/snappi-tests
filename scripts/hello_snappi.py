@@ -12,10 +12,10 @@ def hello_snappi():
     """
     # create a new API instance where host points to controller
     api = snappi.api(host='https://localhost')
-    # and a traffic configuration to be pushed later on
+    # and an empty traffic configuration to be pushed to controller later on
     cfg = api.config()
 
-    # add two ports where location points to address of athena traffic-engine
+    # add two ports where location points to traffic-engine (aka ports)
     p1, p2 = (
         cfg.ports
         .port(name='p1', location='localhost:5555')
