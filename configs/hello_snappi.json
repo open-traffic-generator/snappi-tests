@@ -1,0 +1,183 @@
+{
+  "ports": [
+    {
+      "location": "localhost:5555",
+      "name": "p1"
+    },
+    {
+      "location": "localhost:5556",
+      "name": "p2"
+    }
+  ],
+  "layer1": [
+    {
+      "port_names": [
+        "p1",
+        "p2"
+      ],
+      "speed": "speed_1_gbps",
+      "name": "ly"
+    }
+  ],
+  "captures": [
+    {
+      "port_names": [
+        "p1",
+        "p2"
+      ],
+      "name": "cp"
+    }
+  ],
+  "flows": [
+    {
+      "name": "flow p1->p2",
+      "tx_rx": {
+        "port": {
+          "tx_name": "p1",
+          "rx_name": "p2"
+        },
+        "choice": "port"
+      },
+      "size": {
+        "fixed": 128,
+        "choice": "fixed"
+      },
+      "duration": {
+        "fixed_packets": {
+          "packets": 1000
+        },
+        "choice": "fixed_packets"
+      },
+      "rate": {
+        "pps": 1000,
+        "choice": "pps"
+      },
+      "packet": [
+        {
+          "ethernet": {
+            "src": {
+              "value": "00:AA:00:00:04:00",
+              "choice": "value"
+            },
+            "dst": {
+              "value": "00:AA:00:00:00:AA",
+              "choice": "value"
+            }
+          },
+          "choice": "ethernet"
+        },
+        {
+          "ipv4": {
+            "src": {
+              "value": "10.0.0.1",
+              "choice": "value"
+            },
+            "dst": {
+              "value": "10.0.0.2",
+              "choice": "value"
+            }
+          },
+          "choice": "ipv4"
+        },
+        {
+          "udp": {
+            "src_port": {
+              "increment": {
+                "start": 5000,
+                "step": 2,
+                "count": 10
+              },
+              "choice": "increment"
+            },
+            "dst_port": {
+              "values": [
+                4000,
+                4044,
+                4060,
+                4074
+              ],
+              "choice": "values"
+            }
+          },
+          "choice": "udp"
+        }
+      ]
+    },
+    {
+      "name": "flow p2->p1",
+      "tx_rx": {
+        "port": {
+          "tx_name": "p2",
+          "rx_name": "p1"
+        },
+        "choice": "port"
+      },
+      "size": {
+        "fixed": 256,
+        "choice": "fixed"
+      },
+      "duration": {
+        "fixed_packets": {
+          "packets": 1000
+        },
+        "choice": "fixed_packets"
+      },
+      "rate": {
+        "pps": 1000,
+        "choice": "pps"
+      },
+      "packet": [
+        {
+          "ethernet": {
+            "dst": {
+              "value": "00:AA:00:00:04:00",
+              "choice": "value"
+            },
+            "src": {
+              "value": "00:AA:00:00:00:AA",
+              "choice": "value"
+            }
+          },
+          "choice": "ethernet"
+        },
+        {
+          "ipv4": {
+            "dst": {
+              "value": "10.0.0.1",
+              "choice": "value"
+            },
+            "src": {
+              "value": "10.0.0.2",
+              "choice": "value"
+            }
+          },
+          "choice": "ipv4"
+        },
+        {
+          "udp": {
+            "src_port": {
+              "increment": {
+                "start": 6000,
+                "step": 4,
+                "count": 10
+              },
+              "choice": "increment"
+            },
+            "dst_port": {
+              "values": [
+                8000,
+                8044,
+                8060,
+                8074,
+                8082,
+                8084
+              ],
+              "choice": "values"
+            }
+          },
+          "choice": "udp"
+        }
+      ]
+    }
+  ]
+}

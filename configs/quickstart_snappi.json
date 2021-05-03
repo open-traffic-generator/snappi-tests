@@ -1,0 +1,33 @@
+{
+  "ports": [
+    {
+      "location": "localhost:5555",
+      "name": "prt"
+    }
+  ],
+  "flows": [
+    {
+      "name": "flw",
+      "tx_rx": {
+        "port": {
+          "tx_name": "prt"
+        },
+        "choice": "port"
+      },
+      "packet": [
+        {
+          "ethernet": {},
+          "choice": "ethernet"
+        },
+        {
+          "ipv4": {},
+          "choice": "ipv4"
+        },
+        {
+          "tcp": {},
+          "choice": "tcp"
+        }
+      ]
+    }
+  ]
+}
