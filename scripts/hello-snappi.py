@@ -7,9 +7,8 @@ def hello_snappi():
     - Send 1000 packets back and forth between the two ports at a rate of
       1000 packets per second.
     - Validate that total packets sent and received on both interfaces is as
-      expected using **port metrics**.
-    - Validate that captured UDP packets on both the ports have expected
-      destination UDP port.
+      expected using port metrics.
+    - Validate that captured UDP packets on both the ports are as expected.
     """
     # create a new API instance where host points to controller
     api = snappi.api(host='https://localhost')
@@ -66,24 +65,25 @@ def hello_snappi():
     udp2.src_port.increment.count = 10
 
     # assign list of port numbers as destination UDP ports
-    udp1.dst_port.values = [7001, 7010, 7015, 7018]
-    udp2.dst_port.values = [8001, 8010, 8015, 8018]
+    udp1.dst_port.values = [4000, 4044, 4060, 4074]
+    udp2.dst_port.values = [8000, 8044, 8060, 8074, 8082, 8084]
 
-    # push configuration
+    print('Pushing traffic configuration ...')
     api.set_config(cfg)
 
-    # start packet capture on all configured ports
+    print('Starting packet capture on all configured ports ...')
     cs = api.capture_state()
     cs.state = cs.START
     api.set_capture_state(cs)
 
-    # start transmitting configured flows
+    print('Starting transmit on all configured flows ...')
     ts = api.transmit_state()
     ts.state = ts.START
     api.set_transmit_state(ts)
 
-    assert metrics_ok(api, cfg)
-    assert captures_ok(api, cfg)
+    assert metrics_ok(api, cfg) and captures_ok(api, cfg), 'Test failed !'
+
+    print('Test passed !')
 
 
 def metrics_ok(api, cfg):
@@ -95,8 +95,9 @@ def metrics_ok(api, cfg):
 
     import time
     start = time.time()
-    exp_pkt = sum([f.duration.fixed_packets.packets for f in cfg.flows])
-
+    exp = sum([f.duration.fixed_packets.packets for f in cfg.flows])
+    print('Port Metrics:\nTimestamp\tExpected\tTotal Tx\tTotal Rx')
+    # poll for total tx/rx to be correct, for 30 seconds
     while time.time() - start < 30:
         # fetch port metrics
         res = api.get_metrics(req)
@@ -104,23 +105,23 @@ def metrics_ok(api, cfg):
         total_tx = sum([m.frames_tx for m in res.port_metrics])
         total_rx = sum([m.frames_rx for m in res.port_metrics])
 
-        if exp_pkt == total_tx == total_rx:
+        print('%d\t%d\t\t%d\t\t%d' % (time.time(), exp, total_tx, total_rx))
+        if exp == total_tx and total_rx >= exp:
             return True
 
-        print(total_tx, total_rx)
-        time.sleep(0.5)
+        time.sleep(0.1)
 
     return False
 
 
 def captures_ok(api, cfg):
     import dpkt
+    print('Fetching captured packets from configured ports ...')
+    print('Port Capture:\nPort Name\tExpected\tUDP packets')
 
+    result = []
     for p in cfg.ports:
-        # figure out expected destination UDP ports on current port
-        i = 0 if p.name == cfg.flows[0].tx_rx.port.rx_name else 1
-        dst_ports = cfg.flows[i].packet[-1].dst_port.values
-
+        exp, act = 1000, 0
         # create capture request and filter based on port name
         req = api.capture_request()
         req.port_name = p.name
@@ -129,10 +130,13 @@ def captures_ok(api, cfg):
         for _, buf in pcap:
             # check if the destination UDP port is among what was configured
             eth = dpkt.ethernet.Ethernet(buf)
-            if eth.data.data.dport not in dst_ports:
-                return False
+            if isinstance(eth.data.data, dpkt.udp.UDP):
+                act += 1
 
-    return True
+        print('%s\t\t%d\t\t%d' % (p.name, exp, act))
+        result.append(exp == act)
+
+    return all(result)
 
 
 if __name__ == '__main__':
