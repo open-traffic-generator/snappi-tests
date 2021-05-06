@@ -40,7 +40,9 @@ def hello_snappi():
     # configure packet size, rate and duration for both flows
     f1.size.fixed, f2.size.fixed = 128, 256
     for f in cfg.flows:
+        # send 1000 packets and stop
         f.duration.fixed_packets.packets = 1000
+        # send 1000 packets per second
         f.rate.pps = 1000
 
     # configure packet with Ethernet, IPv4 and UDP headers for both flows
