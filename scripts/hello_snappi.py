@@ -83,7 +83,11 @@ def hello_snappi():
     ts.state = ts.START
     api.set_transmit_state(ts)
 
-    assert metrics_ok(api, cfg) and captures_ok(api, cfg), 'Test failed !'
+    print('Checking metrics on all configured ports ...')
+    print('Expected\tTotal Tx\tTotal Rx')
+    assert wait_for(lambda: metrics_ok(api, cfg)), 'Metrics validation failed!'
+
+    assert captures_ok(api, cfg), 'Capture validation failed!'
 
     print('Test passed !')
 
@@ -95,31 +99,22 @@ def metrics_ok(api, cfg):
     # include only sent and received packet counts
     req.port.column_names = [req.port.FRAMES_TX, req.port.FRAMES_RX]
 
-    import time
-    start = time.time()
-    exp = sum([f.duration.fixed_packets.packets for f in cfg.flows])
-    print('Port Metrics:\nTimestamp\tExpected\tTotal Tx\tTotal Rx')
-    # poll for total tx/rx to be correct, for 30 seconds
-    while time.time() - start < 30:
-        # fetch port metrics
-        res = api.get_metrics(req)
-        # calculate total frames sent and received across all configured ports
-        total_tx = sum([m.frames_tx for m in res.port_metrics])
-        total_rx = sum([m.frames_rx for m in res.port_metrics])
+    # fetch port metrics
+    res = api.get_metrics(req)
+    # calculate total frames sent and received across all configured ports
+    total_tx = sum([m.frames_tx for m in res.port_metrics])
+    total_rx = sum([m.frames_rx for m in res.port_metrics])
+    expected = sum([f.duration.fixed_packets.packets for f in cfg.flows])
 
-        print('%d\t%d\t\t%d\t\t%d' % (time.time(), exp, total_tx, total_rx))
-        if exp == total_tx and total_rx >= exp:
-            return True
+    print('%d\t\t%d\t\t%d' % (expected, total_tx, total_rx))
 
-        time.sleep(0.1)
-
-    return False
+    return expected == total_tx and total_rx >= expected
 
 
 def captures_ok(api, cfg):
     import dpkt
-    print('Fetching captured packets from configured ports ...')
-    print('Port Capture:\nPort Name\tExpected\tUDP packets')
+    print('Checking captured packets on all configured ports ...')
+    print('Port Name\tExpected\tUDP packets')
 
     result = []
     for p in cfg.ports:
@@ -139,6 +134,23 @@ def captures_ok(api, cfg):
         result.append(exp == act)
 
     return all(result)
+
+
+def wait_for(func, timeout=10, interval=0.2):
+    """
+    Keeps calling the `func` until it returns true or `timeout` occurs
+    every `interval` seconds.
+    """
+    import time
+    start = time.time()
+
+    while time.time() - start <= timeout:
+        if func():
+            return True
+        time.sleep(interval)
+
+    print('Timeout occurred !')
+    return False
 
 
 if __name__ == '__main__':
