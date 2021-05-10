@@ -50,12 +50,12 @@ def hello_snappi():
     eth2, ip2, udp2 = f2.packet.ethernet().ipv4().udp()
 
     # set source and destination MAC addresses
-    eth1.src.value, eth2.dst.value = ('00:AA:00:00:04:00', ) * 2
-    eth2.src.value, eth1.dst.value = ('00:AA:00:00:00:AA', ) * 2
+    eth1.src.value, eth1.dst.value = '00:AA:00:00:04:00', '00:AA:00:00:00:AA'
+    eth2.src.value, eth2.dst.value = '00:AA:00:00:00:AA', '00:AA:00:00:04:00'
 
     # set source and destination IPv4 addresses
-    ip1.src.value, ip2.dst.value = ('10.0.0.1', ) * 2
-    ip2.src.value, ip1.dst.value = ('10.0.0.2', ) * 2
+    ip1.src.value, ip1.dst.value = '10.0.0.1', '10.0.0.2'
+    ip2.src.value, ip2.dst.value = '10.0.0.2', '10.0.0.1'
 
     # set incrementing port numbers as source UDP ports
     udp1.src_port.increment.start = 5000
