@@ -6,14 +6,14 @@ This repository consists of end-to-end test scripts written in [snappi](https://
 
 Please make sure that the client setup meets [Python Prerequisites](#python-prerequisites).
 
->This repository is currently work-in-progress, and hence only the tests inside `tests/raw` have been tested against both `athena` and `IxNetwork`.
+>This repository is currently work-in-progress, and hence only the tests inside `tests/raw` have been tested against both `ixia-c` and `IxNetwork`.
 
 - Clone this project, `cd` inside it.
 
 - Install `snappi` (along with extensions if needed).
 
   ```sh
-  # if no extensions are needed - e.g. for athena testbed
+  # if no extensions are needed - e.g. for ixia-c testbed
   python -m pip install --upgrade snappi
   # install with ixnetwork extension - for ixnetwork testbed
   python -m pip install --upgrade "snappi[ixnetwork]"
@@ -28,7 +28,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
 - Update `tests/settings.json`
 
   ```sh
-  # sample for athena testbed
+  # sample for ixia-c testbed
   {
     # controller address
     "api_server": "https://localhost",

@@ -1,10 +1,10 @@
 import snappi
-# create a new API instance where host points to athena controller
+# create a new API instance where host points to controller
 api = snappi.api(host='https://localhost')
 
 # create a config object to be pushed to controller
 config = api.config()
-# add a port with location pointing to athena traffic engine
+# add a port with location pointing to traffic engine
 prt = config.ports.port(name='prt', location='localhost:5555')[-1]
 # add a flow with packet size 128 bytes and assign endpoints
 flw = config.flows.flow(name='flw')[-1]
