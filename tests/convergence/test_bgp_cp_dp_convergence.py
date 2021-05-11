@@ -14,21 +14,12 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     7. Wait for sometime and stop the traffic
     8. Obtain cp/dp convergence and validate against expected
     """
-    api.set_config(api.config())
-    response = api.set_config(bgp_convergence_config)
-    assert(len(response.errors)) == 0
-
-    # build the configuration for advanced convergence metrics
-    adv_metrics = api.advancedmetrics_config()
-    adv_metrics.convergence.enable = True
-    adv_metrics.convergence.rx_rate_threshold = 90
-    api.set_advanced_metrics(adv_metrics)
+    api.set_config(bgp_convergence_config)
 
     # Start traffic
     ts = api.transmit_state()
     ts.state = ts.START
-    response = api.set_transmit_state(ts)
-    assert(len(response.errors)) == 0
+    api.set_transmit_state(ts)
 
     # Wait for traffic to start and get tx frame rate
     utils.wait_for(
@@ -46,8 +37,7 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     # Stop traffic(optional)
     ts = api.transmit_state()
     ts.state = ts.STOP
-    response = api.set_transmit_state(ts)
-    assert(len(response.errors)) == 0
+    api.set_transmit_state(ts)
 
     # Wait for traffic to stop and get total tx frames & rx frames
     utils.wait_for(
@@ -55,20 +45,19 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     )
 
     # get advanced data plane convergence metrics
-    adv_metrics_request = api.advancedmetrics_request()
-    adv_metrics_request.convergence.flow_names = [
+    adv_analytics_request = api.advancedanalytics_request()
+    adv_analytics_request.metric_names = adv_analytics_request.CONVERGENCE
+    adv_analytics_request.flow_names = [
         bgp_convergence_config.flows[0].name
-    ]
-    adv_metrics_request.convergence.event_sources = [
-        PRIMARY_ROUTES_NAME
     ]
 
     # output the convergence metrics
-    adv_metrics = api.get_advanced_metrics(adv_metrics_request)
+    analytics = api.get_analytics(adv_analytics_request)
 
     # fail the test if cp/dp convergence takes longer than 500ms
-    assert(all([m.control_plane_data_plane_convergence_ns < 500000000
-                for m in adv_metrics.convergence_metrics]))
+    assert(
+        all([m.convergence.control_plane_data_plane_convergence_ns < 500000000
+            for m in analytics]))
 
 
 def is_traffic_started(api):
@@ -88,7 +77,7 @@ def is_traffic_stopped(api):
 
 
 def get_flow_stats(api):
-    request = api.metrics_request()
-    request.flow.flow_names = []
-    return api.get_metrics(request).flow_metrics
+    request = api.advancedmetrics_request()
+    request.flow_names = []
+    return api.get_flow_metrics(request)
 

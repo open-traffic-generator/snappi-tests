@@ -54,11 +54,10 @@ def bgp_convergence_config(api, utils):
     rx1_bgpv4.as_type = "ebgp"
     rx1_bgpv4.dut_address = "22.1.1.1"
     rx1_bgpv4.as_number = "65200"
-    rx1_rr = rx1_bgpv4.bgpv4_routes.bgpv4route()[-1]
-    rx1_rr.name = "rx1_rr"
-    # rx1_rr.address_count = "1000"
-    # rx1_rr.address = "200.1.0.1"
-    # rx1_rr.prefix = "32"
+    rx1_rr = rx1_bgpv4.bgpv4_routes.bgpv4route(name="rx1_rr")[-1]
+    rx1_rr.addresses.bgpv4routeaddress(count=1000,
+                                       address='200.1.0.1',
+                                       prefix=32)
 
     # rx2_device config
     rx2_eth = rx2_device.ethernet
@@ -74,11 +73,17 @@ def bgp_convergence_config(api, utils):
     rx2_bgpv4.dut_address = "23.1.1.1"
     rx2_bgpv4.as_number = "65200"
 
-    rx2_rr = rx2_bgpv4.bgpv4_routes.bgpv4route()[-1]
-    rx2_rr.name = "rx2_rr"
-    # rx2_rr.address_count = "1000"
-    # rx2_rr.address = "200.1.0.1"
-    # rx2_rr.prefix = "32"
+    rx2_rr = rx2_bgpv4.bgpv4_routes.bgpv4route(name="rx2_rr")[-1]
+    rx2_rr.addresses.bgpv4routeaddress(count=1000,
+                                       address='200.1.0.1',
+                                       prefix=32)
+
+    # convergence config
+    config.advanced.event.enable = True
+    config.advanced.event.rx_rate_threshold.enable = True
+    config.advanced.event.rx_rate_threshold.threshold = 90
+
+    config.advanced.convergence.enable = True
 
     # flow config
     flow = config.flows.flow(name='convergence_test')[-1]
@@ -87,5 +92,6 @@ def bgp_convergence_config(api, utils):
 
     flow.size.fixed = "1024"
     flow.rate.percentage = "50"
+    flow.metrics = True
 
     return config
