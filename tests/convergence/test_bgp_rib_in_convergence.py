@@ -7,21 +7,28 @@ MAX_CONVERGENCE = 500000000
 
 
 @pytest.mark.dut
-def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
+def test_bgp_rib_in_convergence(api, utils, bgp_convergence_config):
     """
     5. set advanced metric settings & start traffic
     6. Trigger withdraw routes
     7. Wait for sometime and stop the traffic
     8. Obtain cp/dp convergence and validate against expected
     """
+    # TODO: depending on rx ports (threshold = 90/n)
     # convergence config
     bgp_convergence_config.advanced.event.enable = True
     bgp_convergence_config.advanced.event.rx_rate_threshold.enable = True
-    bgp_convergence_config.advanced.event.rx_rate_threshold.threshold = 90
+    bgp_convergence_config.advanced.event.rx_rate_threshold.threshold = 45
 
     bgp_convergence_config.advanced.convergence.enable = True
 
     api.set_config(bgp_convergence_config)
+
+    # withdraw primary routes and secondary routes
+    route_state = api.route_state()
+    route_state.state = route_state.WITHDRAW
+    route_state.names = [PRIMARY_ROUTES_NAME, SECONDARY_ROUTES_NAME]
+    api.set_route_state(route_state)
 
     # Start traffic
     ts = api.transmit_state()
@@ -33,25 +40,11 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
         lambda: is_traffic_started(api), 'traffic to start'
     )
 
-    # TODO: wait till 50% traffic is touched
-
-    # withdraw primary routes using the primary_routes_name
+    # Advertise primary_routes and secondary routes
     route_state = api.route_state()
-    route_state.state = route_state.WITHDRAW
-    route_state.names = [PRIMARY_ROUTES_NAME]
+    route_state.state = route_state.ADVERTISE
+    route_state.names = [PRIMARY_ROUTES_NAME, SECONDARY_ROUTES_NAME]
     api.set_route_state(route_state)
-
-    # TODO: Add wait_for to check withdraw has triggered
-
-    # Stop traffic(optional)
-    ts = api.transmit_state()
-    ts.state = ts.STOP
-    api.set_transmit_state(ts)
-
-    # Wait for traffic to stop and get total tx frames & rx frames
-    utils.wait_for(
-        lambda: is_traffic_stopped(api), 'traffic to stop'
-    )
 
     # get advanced data plane convergence metrics
     adv_analytics_request = api.advancedanalytics_request()
@@ -63,9 +56,21 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     # output the convergence metrics
     analytics = api.get_analytics(adv_analytics_request)
     # fail the test if cp/dp convergence takes longer than 500ms
+    print([m.convergence.control_plane_data_plane_convergence_ns
+           for m in analytics])
     assert(
         all([m.convergence.control_plane_data_plane_convergence_ns < 500000000
             for m in analytics]))
+
+    # Stop traffic(optional)
+    ts = api.transmit_state()
+    ts.state = ts.STOP
+    api.set_transmit_state(ts)
+
+    # Wait for traffic to stop and get total tx frames & rx frames
+    utils.wait_for(
+        lambda: is_traffic_stopped(api), 'traffic to stop'
+    )
 
 
 def is_traffic_started(api):

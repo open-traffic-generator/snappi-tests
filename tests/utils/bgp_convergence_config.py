@@ -78,13 +78,6 @@ def bgp_convergence_config(api, utils):
                                        address='200.1.0.1',
                                        prefix=32)
 
-    # convergence config
-    config.advanced.event.enable = True
-    config.advanced.event.rx_rate_threshold.enable = True
-    config.advanced.event.rx_rate_threshold.threshold = 90
-
-    config.advanced.convergence.enable = True
-
     # flow config
     flow = config.flows.flow(name='convergence_test')[-1]
     flow.tx_rx.device.tx_names = [tx_device.name]
