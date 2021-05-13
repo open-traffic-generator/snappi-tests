@@ -125,7 +125,7 @@ def captures_ok(api, cfg):
         # fetch captured pcap bytes and feed it to pcap parser dpkt
         pcap = dpkt.pcap.Reader(api.get_capture(req))
         for _, buf in pcap:
-            # check if the destination UDP port is among what was configured
+            # check if current packet is a valid UDP packet
             eth = dpkt.ethernet.Ethernet(buf)
             if isinstance(eth.data.data, dpkt.udp.UDP):
                 act += 1
