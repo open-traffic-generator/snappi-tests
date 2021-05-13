@@ -1,9 +1,9 @@
 {
     "username": "common",
-    "api_server": "https://localhost",
+    "api_server": "https://athena-node-one.ccu.is.keysight.com",
     "ports": [
-        "localhost:5555",
-        "localhost:5556"
+        "athena-node-one.ccu.is.keysight.com:5555",
+        "athena-node-one.ccu.is.keysight.com:5556"
     ],
     "ext": null,
     "speed": "speed_1_gbps",

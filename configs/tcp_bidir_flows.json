@@ -11,7 +11,7 @@
   ],
   "layer1": [
     {
-      "media": "fiber",
+      "name": "ly",
       "port_names": ["tx", "rx"],
       "speed": "speed_1_gbps"
     }
