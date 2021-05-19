@@ -2,49 +2,43 @@ import pytest
 
 PRIMARY_ROUTES_NAME = 'rx1_rr'
 SECONDARY_ROUTES_NAME = 'rx2_rr'
+PRIMARY_PORT_NAME = 'rx1'
 # maximum convergence 3s
 MAX_CON = 3000000
 
 
 @pytest.mark.dut
-def test_bgp_rib_in_convergence(api, utils, bgp_convergence_config):
+def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     """
     5. set advanced metric settings & start traffic
-    6. Advertise Primary and Secondary routes
+    6. Shut down receive primary port
     7. Wait for traffic to converge
     8. Obtain cp/dp convergence and validate against expected
     """
-    # TODO: depending on rx ports (threshold = 90/n)
     # convergence config
     bgp_convergence_config.advanced.event.enable = True
     bgp_convergence_config.advanced.event.rx_rate_threshold.enable = True
-    bgp_convergence_config.advanced.event.rx_rate_threshold.threshold = 45
+    bgp_convergence_config.advanced.event.rx_rate_threshold.threshold = 90
 
     bgp_convergence_config.advanced.convergence.enable = True
 
     api.set_config(bgp_convergence_config)
-
-    # withdraw primary routes and secondary routes
-    route_state = api.route_state()
-    route_state.state = route_state.WITHDRAW
-    route_state.names = [PRIMARY_ROUTES_NAME, SECONDARY_ROUTES_NAME]
-    api.set_route_state(route_state)
 
     # Start traffic
     ts = api.transmit_state()
     ts.state = ts.START
     api.set_transmit_state(ts)
 
-    # Wait for traffic to start and get tx frame rate
+    # Wait for traffic to start
     utils.wait_for(
         lambda: is_traffic_started(api), 'traffic to start'
     )
 
-    # Advertise primary_routes and secondary routes
-    route_state = api.route_state()
-    route_state.state = route_state.ADVERTISE
-    route_state.names = [PRIMARY_ROUTES_NAME, SECONDARY_ROUTES_NAME]
-    api.set_route_state(route_state)
+    # Shut down the primary port
+    link_state = api.link_state()
+    link_state.state = link_state.DOWN
+    link_state.port_names = [PRIMARY_PORT_NAME]
+    api.set_link_state(link_state)
 
     # Wait for traffic to converge
     utils.wait_for(
@@ -73,7 +67,8 @@ def is_traffic_started(api):
     Returns true if traffic in start state
     """
     flow_stats = get_flow_stats(api)
-    return all([int(fs.frames_tx_rate) > 0 for fs in flow_stats])
+    return all([int(fs.frames_rx_rate) == int(fs.frames_tx_rate) / 2
+               for fs in flow_stats])
 
 
 def is_traffic_converged(api):
@@ -81,8 +76,8 @@ def is_traffic_converged(api):
     Returns true if traffic in stop state
     """
     flow_stats = get_flow_stats(api)
-    return all([int(fs.frames_rx_rate) == int(fs.frames_tx_rate) / 2
-               for fs in flow_stats])
+    return all([int(fs.frames_tx_rate) == int(fs.frames_rx_rate)
+               for fs in flow_stats if fs.port_rx == 'rx2'])
 
 
 def get_flow_stats(api):

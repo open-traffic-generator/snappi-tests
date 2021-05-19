@@ -11,7 +11,7 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     """
     5. set advanced metric settings & start traffic
     6. Trigger withdraw routes
-    7. Wait for sometime and stop the traffic
+    7. Wait for traffic to converge
     8. Obtain cp/dp convergence and validate against expected
     """
     # convergence config
@@ -28,7 +28,7 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     ts.state = ts.START
     api.set_transmit_state(ts)
 
-    # Wait for traffic to start and get tx frame rate
+    # Wait for traffic to start
     utils.wait_for(
         lambda: is_traffic_started(api), 'traffic to start'
     )
@@ -66,8 +66,8 @@ def is_traffic_started(api):
     Returns true if traffic in start state
     """
     flow_stats = get_flow_stats(api)
-    return all([int(fs.frames_tx_rate) > 0 and int(fs.loss) == 50
-                for fs in flow_stats])
+    return all([int(fs.frames_rx_rate) == int(fs.frames_tx_rate) / 2
+               for fs in flow_stats])
 
 
 def is_traffic_converged(api):
