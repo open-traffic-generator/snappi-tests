@@ -2,8 +2,8 @@ import pytest
 
 PRIMARY_ROUTES_NAME = 'rx1_rr'
 SECONDARY_ROUTES_NAME = 'rx2_rr'
-# maximum convergence 500ms
-MAX_CONVERGENCE = 500000000
+# maximum convergence 3s
+MAX_CON = 3000000
 
 
 @pytest.mark.dut
@@ -33,24 +33,15 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
         lambda: is_traffic_started(api), 'traffic to start'
     )
 
-    # TODO: wait till 50% traffic is touched
-
     # withdraw primary routes using the primary_routes_name
     route_state = api.route_state()
     route_state.state = route_state.WITHDRAW
     route_state.names = [PRIMARY_ROUTES_NAME]
     api.set_route_state(route_state)
 
-    # TODO: Add wait_for to check withdraw has triggered
-
-    # Stop traffic(optional)
-    ts = api.transmit_state()
-    ts.state = ts.STOP
-    api.set_transmit_state(ts)
-
-    # Wait for traffic to stop and get total tx frames & rx frames
+    # Wait for traffic to converge
     utils.wait_for(
-        lambda: is_traffic_stopped(api), 'traffic to stop'
+        lambda: is_traffic_converged(api), 'traffic to converge'
     )
 
     # get advanced data plane convergence metrics
@@ -63,8 +54,10 @@ def test_bgp_cp_dp_convergence(api, utils, bgp_convergence_config):
     # output the convergence metrics
     analytics = api.get_analytics(adv_analytics_request)
     # fail the test if cp/dp convergence takes longer than 500ms
+    print([m.convergence.control_plane_data_plane_convergence_ns
+           for m in analytics])
     assert(
-        all([m.convergence.control_plane_data_plane_convergence_ns < 500000000
+        all([m.convergence.control_plane_data_plane_convergence_ns < MAX_CON
             for m in analytics]))
 
 
@@ -73,15 +66,17 @@ def is_traffic_started(api):
     Returns true if traffic in start state
     """
     flow_stats = get_flow_stats(api)
-    return all([int(fs.frames_tx_rate) > 0 for fs in flow_stats])
+    return all([int(fs.frames_tx_rate) > 0 and int(fs.loss) == 50
+                for fs in flow_stats])
 
 
-def is_traffic_stopped(api):
+def is_traffic_converged(api):
     """
     Returns true if traffic in stop state
     """
     flow_stats = get_flow_stats(api)
-    return all([int(fs.frames_tx_rate) == 0 for fs in flow_stats])
+    return all([int(fs.frames_tx_rate) == int(fs.frames_rx_rate)
+               for fs in flow_stats if fs.port_rx == 'rx2'])
 
 
 def get_flow_stats(api):

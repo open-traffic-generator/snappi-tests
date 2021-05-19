@@ -46,6 +46,11 @@ def test_bgp_rib_in_convergence(api, utils, bgp_convergence_config):
     route_state.names = [PRIMARY_ROUTES_NAME, SECONDARY_ROUTES_NAME]
     api.set_route_state(route_state)
 
+    # Wait for traffic to converge
+    utils.wait_for(
+        lambda: is_traffic_converged(api), 'traffic to converge'
+    )
+
     # get advanced data plane convergence metrics
     adv_analytics_request = api.advancedanalytics_request()
     adv_analytics_request.metric_names = adv_analytics_request.CONVERGENCE
@@ -62,16 +67,6 @@ def test_bgp_rib_in_convergence(api, utils, bgp_convergence_config):
         all([m.convergence.control_plane_data_plane_convergence_ns < 500000000
             for m in analytics]))
 
-    # Stop traffic(optional)
-    ts = api.transmit_state()
-    ts.state = ts.STOP
-    api.set_transmit_state(ts)
-
-    # Wait for traffic to stop and get total tx frames & rx frames
-    utils.wait_for(
-        lambda: is_traffic_stopped(api), 'traffic to stop'
-    )
-
 
 def is_traffic_started(api):
     """
@@ -81,12 +76,13 @@ def is_traffic_started(api):
     return all([int(fs.frames_tx_rate) > 0 for fs in flow_stats])
 
 
-def is_traffic_stopped(api):
+def is_traffic_converged(api):
     """
     Returns true if traffic in stop state
     """
     flow_stats = get_flow_stats(api)
-    return all([int(fs.frames_tx_rate) == 0 for fs in flow_stats])
+    return all([int(fs.frames_rx_rate) == int(fs.frames_tx_rate) / 2
+               for fs in flow_stats])
 
 
 def get_flow_stats(api):
