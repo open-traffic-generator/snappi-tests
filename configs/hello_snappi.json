@@ -129,12 +129,12 @@
       "packet": [
         {
           "ethernet": {
-            "dst": {
-              "value": "00:AA:00:00:04:00",
-              "choice": "value"
-            },
             "src": {
               "value": "00:AA:00:00:00:AA",
+              "choice": "value"
+            },
+            "dst": {
+              "value": "00:AA:00:00:04:00",
               "choice": "value"
             }
           },
@@ -142,12 +142,12 @@
         },
         {
           "ipv4": {
-            "dst": {
-              "value": "10.0.0.1",
-              "choice": "value"
-            },
             "src": {
               "value": "10.0.0.2",
+              "choice": "value"
+            },
+            "dst": {
+              "value": "10.0.0.1",
               "choice": "value"
             }
           },

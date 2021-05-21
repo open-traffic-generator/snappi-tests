@@ -6,7 +6,7 @@ This repository consists of end-to-end test scripts written in [snappi](https://
 
 Please make sure that the client setup meets [Python Prerequisites](#python-prerequisites).
 
->This repository is currently work-in-progress, and hence only the tests inside `tests/raw` have been tested against both `ixia-c` and `IxNetwork`.
+>This repository is currently work-in-progress, and hence only the tests inside `tests/raw` have been tested against both [Ixia-c](https://github.com/open-traffic-generator/ixia-c) and [IxNetwork](https://www.keysight.com/in/en/products/network-test/protocol-load-test/ixnetwork.html).
 
 - Clone this project, `cd` inside it.
 
@@ -14,9 +14,9 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
 
   ```sh
   # if no extensions are needed - e.g. for ixia-c testbed
-  python -m pip install --upgrade snappi
+  python -m pip install --upgrade snappi==0.3.19
   # install with ixnetwork extension - for ixnetwork testbed
-  python -m pip install --upgrade "snappi[ixnetwork]"
+  python -m pip install --upgrade "snappi[ixnetwork]==0.3.19"
   ```
 
 - Install test dependencies.

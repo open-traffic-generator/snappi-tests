@@ -18,6 +18,12 @@
         "fixed": 128,
         "choice": "fixed"
       },
+      "duration": {
+        "fixed_packets": {
+          "packets": 100
+        },
+        "choice": "fixed_packets"
+      },
       "packet": [
         {
           "ethernet": {},
