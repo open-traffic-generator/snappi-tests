@@ -114,6 +114,12 @@ def test_raw_tcp_flow_capture(api, utils):
     f2.size.fixed = size
     f2.duration.fixed_packets.packets = packets
 
+    f1.metrics.enable = True
+    f1.metrics.loss = True
+
+    f2.metrics.enable = True
+    f2.metrics.loss = True
+
     # Starting transmit on flows
     utils.start_traffic(api, config)
 

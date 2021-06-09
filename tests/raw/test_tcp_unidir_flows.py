@@ -27,6 +27,9 @@ def test_tcp_unidir_flows(api, utils):
     flow.tx_rx.port.tx_name = tx.name
     flow.tx_rx.port.rx_name = rx.name
 
+    flow.metrics.enable = True
+    flow.metrics.loss = True
+
     size = 128
     packets = 1000
     flow.size.fixed = size

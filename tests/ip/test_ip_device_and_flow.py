@@ -79,6 +79,12 @@ def test_ip_device_and_flow(api, b2b_raw_config, utils):
     f2.duration.fixed_packets.packets = packets
     f2.rate.percentage = "10"
 
+    f1.metrics.enable = True
+    f1.metrics.loss = True
+
+    f2.metrics.enable = True
+    f2.metrics.loss = True
+
     utils.start_traffic(api, b2b_raw_config)
 
     utils.wait_for(
