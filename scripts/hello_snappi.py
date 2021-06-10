@@ -25,7 +25,8 @@ def hello_snappi():
     # add layer 1 property to configure same speed on both ports
     ly = cfg.layer1.layer1(name='ly')[-1]
     ly.port_names = [p1.name, p2.name]
-    ly.speed = ly.SPEED_1_GBPS
+    ly.speed = ly.SPEED_10_GBPS
+    ly.media = ly.FIBER
 
     # enable packet capture on both ports
     cp = cfg.captures.capture(name='cp')[-1]
@@ -44,6 +45,10 @@ def hello_snappi():
         f.duration.fixed_packets.packets = 1000
         # send 1000 packets per second
         f.rate.pps = 1000
+        # enable metric
+        f.metrics.enable = True
+        # enable loss
+        f.metrics.loss = True
 
     # configure packet with Ethernet, IPv4 and UDP headers for both flows
     eth1, ip1, udp1 = f1.packet.ethernet().ipv4().udp()
