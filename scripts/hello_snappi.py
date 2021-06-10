@@ -45,10 +45,6 @@ def hello_snappi():
         f.duration.fixed_packets.packets = 1000
         # send 1000 packets per second
         f.rate.pps = 1000
-        # enable metric
-        f.metrics.enable = True
-        # enable loss
-        f.metrics.loss = True
 
     # configure packet with Ethernet, IPv4 and UDP headers for both flows
     eth1, ip1, udp1 = f1.packet.ethernet().ipv4().udp()
