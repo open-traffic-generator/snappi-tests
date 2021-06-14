@@ -31,6 +31,12 @@ def test_stats_filter_e2e(api, b2b_raw_config, utils):
     flow2.rate.percentage = 10
     flow2.duration.continuous
 
+    flow1.metrics.enable = True
+    flow1.metrics.loss = True
+
+    flow2.metrics.enable = True
+    flow2.metrics.loss = True
+
     utils.start_traffic(api, b2b_raw_config, start_capture=False)
     time.sleep(5)
 
@@ -57,18 +63,18 @@ def test_stats_filter_e2e(api, b2b_raw_config, utils):
     for flow_name in flow_names:
         req = api.metrics_request()
         req.flow.flow_names = [flow_name]
-        req.flow.column_names = ['name']
+        req.flow.metric_names = ['name']
         flow_results = api.get_metrics(req).flow_metrics
         validate_flow_stats_based_on_flow_name(flow_results, flow_name)
 
     # Validation on Flow statistics based on column names
-    column_names = ['frames_tx_rate', 'frames_rx_rate']
-    for column_name in column_names:
+    metric_names = ['frames_tx_rate', 'frames_rx_rate']
+    for metric_name in metric_names:
         req = api.metrics_request()
-        req.flow.column_names = ['name', column_name]
+        req.flow.metric_names = ['name', metric_name]
         flow_results = api.get_metrics(req).flow_metrics
-        validate_flow_stats_based_on_column_name(flow_results,
-                                                 column_name)
+        validate_flow_stats_based_on_metric_name(flow_results,
+                                                 metric_name)
 
     utils.stop_traffic(api, b2b_raw_config, False)
 
@@ -107,10 +113,10 @@ def validate_flow_stats_based_on_flow_name(flow_results, flow_name):
         assert row.name == flow_name
 
 
-def validate_flow_stats_based_on_column_name(flow_results,
-                                             column_name):
+def validate_flow_stats_based_on_metric_name(flow_results,
+                                             metric_name):
     """
     Validate Flow stats based on column_names
     """
     for row in flow_results:
-        assert round(getattr(row, column_name)) > 0
+        assert round(getattr(row, metric_name)) > 0

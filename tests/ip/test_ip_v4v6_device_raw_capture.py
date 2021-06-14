@@ -151,6 +151,18 @@ def test_ip_v4v6_device_and_raw_capture(api, utils):
     f4.size.fixed = size
     f4.duration.fixed_packets.packets = packets
 
+    f1.metrics.enable = True
+    f1.metrics.loss = True
+
+    f2.metrics.enable = True
+    f2.metrics.loss = True
+
+    f3.metrics.enable = True
+    f3.metrics.loss = True
+
+    f4.metrics.enable = True
+    f4.metrics.loss = True
+
     # Starting transmit on flows
     utils.start_traffic(api, config)
 

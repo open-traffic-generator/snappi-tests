@@ -27,6 +27,9 @@ def test_tcp_flow_capture(api, b2b_raw_config, utils):
     flow.size.fixed = size
     flow.rate.percentage = 10
 
+    flow.metrics.enable = True
+    flow.metrics.loss = True
+
     utils.start_traffic(api, b2b_raw_config)
     utils.wait_for(
         lambda: results_ok(api, utils, size, packets),

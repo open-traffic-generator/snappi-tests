@@ -40,6 +40,8 @@ def test_basic_flow_stats(settings):
     flw.duration.fixed_packets.packets = 1000
     # configure protocol headers with defaults fields
     flw.packet.ethernet().vlan().ipv4().tcp()
+    flw.metrics.enable = True
+    flw.metrics.loss = True
     # push configuration
     api.set_config(config)
     # start capture

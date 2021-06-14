@@ -26,6 +26,9 @@ def test_udp_fixed_ports(api, b2b_raw_config, utils):
     f.size.fixed = size
     f.rate.percentage = 10
 
+    f.metrics.enable = True
+    f.metrics.loss = True
+
     utils.start_traffic(api, b2b_raw_config)
     utils.wait_for(
         lambda: stats_ok(api, size, packets, utils), 'stats to be as expected'
