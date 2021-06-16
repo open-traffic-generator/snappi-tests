@@ -6,7 +6,7 @@ def cvg_api():
     # TODO: Graceful way of importing convergence api using snappi_convergence
     from snappi_ixnetwork.convergenceapi import api
 
-    api = api(location='localhost:443')
+    api = api(location='localhost:443', ext='ixnetwork')
     yield api
     if getattr(api, 'assistant', None) is not None:
         api.assistant.Session.remove()
