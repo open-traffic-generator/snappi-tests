@@ -31,13 +31,6 @@ def bgp_convergence_config(utils, cvg_api):
         .port(name='rx2', location=utils.settings.ports[2])
     )
 
-    tx, rx1, rx2 = (
-        config.ports
-        .port(name='tx')
-        .port(name='rx1')
-        .port(name='rx2')
-    )
-
     config.options.port_options.location_preemption = True
     ly = config.layer1.layer1()[-1]
     ly.name = 'ly'
