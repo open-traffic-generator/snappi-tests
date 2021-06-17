@@ -1,12 +1,11 @@
 import pytest
+import snappi_convergence
 
 
 @pytest.fixture(scope='session')
 def cvg_api():
-    # TODO: Graceful way of importing convergence api using snappi_convergence
-    from snappi_ixnetwork.convergenceapi import api
-
-    api = api(location='localhost:443', ext='ixnetwork')
+    api = snappi_convergence.api(location='localhost:443',
+                                 ext='ixnetwork')
     yield api
     if getattr(api, 'assistant', None) is not None:
         api.assistant.Session.remove()
@@ -35,7 +34,7 @@ def bgp_convergence_config(utils, cvg_api):
     ly = config.layer1.layer1()[-1]
     ly.name = 'ly'
     ly.port_names = [tx.name, rx1.name, rx2.name]
-    ly.ieee_media_defaults = False
+    ly.ieee_media_defaults = True
     ly.auto_negotiate = False
     ly.speed = utils.settings.speed
 

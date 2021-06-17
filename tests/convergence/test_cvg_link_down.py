@@ -1,10 +1,11 @@
 import pytest
+import snappi_convergence
 
 
 @pytest.fixture(scope='session')
 def cvg_api():
-    # TODO: Graceful way of importing convergence api using snappi_convergence
-    from snappi_ixnetwork.convergenceapi import api
+    api = snappi_convergence.api(location='localhost:443',
+                                 ext='ixnetwork')
 
     api = api(location='localhost:443', ext='ixnetwork')
     yield api
