@@ -7,7 +7,7 @@ def cvg_api():
     api = snappi_convergence.api(location='localhost:443',
                                  ext='ixnetwork')
 
-    api = api(location='localhost:443', ext='ixnetwork')
+
     yield api
     if getattr(api, 'assistant', None) is not None:
         api.assistant.Session.remove()
