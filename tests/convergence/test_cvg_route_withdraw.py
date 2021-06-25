@@ -48,25 +48,28 @@ def bgp_convergence_config(utils, cvg_api):
     # tx_device config
     tx_eth = tx_device.ethernet
     tx_eth.name = "tx_eth"
+    tx_eth.mac = "00:00:00:00:00:aa"
     tx_ipv4 = tx_eth.ipv4
     tx_ipv4.name = "tx_ipv4"
     tx_ipv4.address = "21.1.1.2"
-    tx_ipv4.prefix = "24"
+    tx_ipv4.prefix = 24
     tx_ipv4.gateway = "21.1.1.1"
 
     # rx1_device config
     rx1_eth = rx1_device.ethernet
     rx1_eth.name = "rx1_eth"
+    rx1_eth.mac = "00:00:00:00:00:bb"
     rx1_ipv4 = rx1_eth.ipv4
     rx1_ipv4.name = "rx1_ipv4"
     rx1_ipv4.address = "22.1.1.2"
-    rx1_ipv4.prefix = "24"
+    rx1_ipv4.prefix = 24
     rx1_ipv4.gateway = "22.1.1.1"
     rx1_bgpv4 = rx1_ipv4.bgpv4
     rx1_bgpv4.name = "rx1_bgpv4"
     rx1_bgpv4.as_type = "ebgp"
     rx1_bgpv4.dut_address = "22.1.1.1"
-    rx1_bgpv4.as_number = "65200"
+    rx1_bgpv4.as_number = 65200
+    rx1_bgpv4.local_address = "22.1.1.2"
     rx1_rr = rx1_bgpv4.bgpv4_routes.bgpv4route(name="rx1_rr")[-1]
     rx1_rr.addresses.bgpv4routeaddress(count=1000,
                                        address='200.1.0.1',
@@ -75,16 +78,18 @@ def bgp_convergence_config(utils, cvg_api):
     # rx2_device config
     rx2_eth = rx2_device.ethernet
     rx2_eth.name = "rx2_eth"
+    rx2_eth.mac = "00:00:00:00:00:cc"
     rx2_ipv4 = rx2_eth.ipv4
     rx2_ipv4.name = "rx2_ipv4"
     rx2_ipv4.address = "23.1.1.2"
-    rx2_ipv4.prefix = "24"
+    rx2_ipv4.prefix = 24
     rx2_ipv4.gateway = "23.1.1.1"
     rx2_bgpv4 = rx2_ipv4.bgpv4
     rx2_bgpv4.name = "rx2_bgp"
     rx2_bgpv4.as_type = "ebgp"
     rx2_bgpv4.dut_address = "23.1.1.1"
-    rx2_bgpv4.as_number = "65200"
+    rx2_bgpv4.local_address = "23.1.1.2"
+    rx2_bgpv4.as_number = 65200
 
     rx2_rr = rx2_bgpv4.bgpv4_routes.bgpv4route(name="rx2_rr")[-1]
     rx2_rr.addresses.bgpv4routeaddress(count=1000,
@@ -96,8 +101,8 @@ def bgp_convergence_config(utils, cvg_api):
     flow.tx_rx.device.tx_names = [tx_device.name]
     flow.tx_rx.device.rx_names = [rx1_rr.name, rx2_rr.name]
 
-    flow.size.fixed = "1024"
-    flow.rate.percentage = "50"
+    flow.size.fixed = 1024
+    flow.rate.percentage = 50
     flow.metrics.enable = True
 
     return conv_config
