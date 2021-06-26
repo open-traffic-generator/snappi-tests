@@ -26,6 +26,9 @@
         },
         "choice": "port"
       },
+      "metrics": {
+        "enable": true
+      },
       "size": {
         "fixed": 128,
         "choice": "fixed"
@@ -86,6 +89,9 @@
           "rx_name": "tx"
         },
         "choice": "port"
+      },
+      "metrics": {
+        "enable": true
       },
       "size": {
         "fixed": 128,

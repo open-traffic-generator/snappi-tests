@@ -34,14 +34,14 @@ def test_basic_flow_stats(settings):
     # flow endpoints
     flw.tx_rx.port.tx_name = tx.name
     flw.tx_rx.port.rx_name = rx.name
+    # allow fetching flow metrics
+    flw.metrics.enable = True
     # configure rate, size, frame count
     flw.size.fixed = 128
     flw.rate.pps = 1000
     flw.duration.fixed_packets.packets = 1000
     # configure protocol headers with defaults fields
     flw.packet.ethernet().vlan().ipv4().tcp()
-    flw.metrics.enable = True
-    flw.metrics.loss = True
     # push configuration
     api.set_config(config)
     # start capture

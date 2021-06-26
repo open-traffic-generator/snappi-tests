@@ -14,9 +14,9 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
 
   ```sh
   # if no extensions are needed - e.g. for ixia-c testbed
-  python -m pip install --upgrade snappi==0.3.20
+  python -m pip install --upgrade snappi==0.4.0
   # install with ixnetwork extension - for ixnetwork testbed
-  python -m pip install --upgrade "snappi[ixnetwork]==0.3.20"
+  python -m pip install --upgrade "snappi[ixnetwork]==0.4.0"
   ```
 
 - Install test dependencies.
