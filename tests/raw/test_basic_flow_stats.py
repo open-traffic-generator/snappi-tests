@@ -14,10 +14,12 @@ def test_basic_flow_stats(settings):
     api = snappi.api(location=settings.location, ext=settings.ext)
 
     config = api.config()
-
     tx, rx = config.ports.port(name="tx", location=settings.ports[0]).port(
         name="rx", location=settings.ports[1]
     )
+    # this will allow us to take over ports that may already be in use
+    config.options.port_options.location_preemption = True
+
     # configure layer 1 properties
     ly = config.layer1.layer1(name="ly")[-1]
     ly.port_names = [tx.name, rx.name]
