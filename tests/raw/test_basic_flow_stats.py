@@ -14,21 +14,21 @@ def test_basic_flow_stats(settings):
     api = snappi.api(location=settings.location, ext=settings.ext)
 
     config = api.config()
-    api.set_config(config)
+
     tx, rx = config.ports.port(name="tx", location=settings.ports[0]).port(
         name="rx", location=settings.ports[1]
     )
     # configure layer 1 properties
-    (ly,) = config.layer1.layer1(name="ly")
+    ly = config.layer1.layer1(name="ly")[-1]
     ly.port_names = [tx.name, rx.name]
     ly.speed = settings.speed
     ly.media = settings.media
     # configure capture
-    (cap,) = config.captures.capture(name="cap")
+    cap = config.captures.capture(name="cap")[-1]
     cap.port_names = [rx.name]
     cap.format = cap.PCAP
     # configure flow properties
-    (flw,) = config.flows.flow(name="flw")
+    flw = config.flows.flow(name="flw")[-1]
     # flow endpoints
     flw.tx_rx.port.tx_name = tx.name
     flw.tx_rx.port.rx_name = rx.name

@@ -44,11 +44,13 @@ def test():
             " otg-novus100g.lbj.is.keysight.com;1;3"
             ' otg-novus100g.lbj.is.keysight.com;1;4"'
         ),
+        "--ext=ixnetwork",
+        "--speed=speed_100_gbps",
         "tests/raw",
     ]
     run(
         [
-            py() + " -m pytest -sv {}".format(" ".join(args)),
+            py() + " -m pytest -svvv {}".format(" ".join(args)),
         ]
     )
 
