@@ -1,13 +1,14 @@
 import snappi
+
 # create a new API instance where host points to controller
-api = snappi.api(host='https://localhost')
+api = snappi.api(location="https://localhost")
 
 # create a config object to be pushed to controller
 config = api.config()
 # add a port with location pointing to traffic engine
-prt = config.ports.port(name='prt', location='localhost:5555')[-1]
+prt = config.ports.port(name="prt", location="localhost:5555")[-1]
 # add a flow and assign endpoints
-flw = config.flows.flow(name='flw')[-1]
+flw = config.flows.flow(name="flw")[-1]
 flw.tx_rx.port.tx_name = prt.name
 
 # configure 100 packets to be sent, each having a size of 128 bytes
