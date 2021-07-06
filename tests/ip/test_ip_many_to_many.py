@@ -61,7 +61,7 @@ def test_ip_many_to_many(api, b2b_raw_config, utils):
     ]
     f1.size.fixed = size
     f1.duration.fixed_packets.packets = packets
-    f1.rate.percentage = "10"
+    f1.rate.percentage = 10
 
     f2.tx_rx.device.tx_names = [
         b2b_raw_config.devices[i].name for i in range(count)
@@ -71,15 +71,15 @@ def test_ip_many_to_many(api, b2b_raw_config, utils):
     ]
     f2.packet.ethernet().ipv4().tcp()
     tcp = f2.packet[-1]
-    tcp.src_port.increment.start = "5000"
-    tcp.src_port.increment.step = "1"
-    tcp.src_port.increment.count = "%d" % count
-    tcp.dst_port.increment.start = "2000"
-    tcp.dst_port.increment.step = "1"
-    tcp.dst_port.increment.count = "%d" % count
+    tcp.src_port.increment.start = 5000
+    tcp.src_port.increment.step = 1
+    tcp.src_port.increment.count = count
+    tcp.dst_port.increment.start = 2000
+    tcp.dst_port.increment.step = 1
+    tcp.dst_port.increment.count = count
     f2.size.fixed = size * 2
     f2.duration.fixed_packets.packets = packets
-    f2.rate.percentage = "10"
+    f2.rate.percentage = 10
 
     f1.metrics.enable = True
     f1.metrics.loss = True

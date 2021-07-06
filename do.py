@@ -46,7 +46,8 @@ def test():
         ),
         "--ext=ixnetwork",
         "--speed=speed_100_gbps",
-        "tests/raw",
+        "tests",
+        '-m "not dut and not l1_manual"',
     ]
     run(
         [
