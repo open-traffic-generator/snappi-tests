@@ -1,6 +1,6 @@
 {
     "username": "common",
-    "api_server": "https://localhost",
+    "location": "https://localhost",
     "ports": [
         "localhost:5555",
         "localhost:5556"

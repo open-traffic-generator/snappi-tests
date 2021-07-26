@@ -11,28 +11,26 @@ def hello_snappi():
     - Validate that captured UDP packets on both the ports are as expected.
     """
     # create a new API instance where host points to controller
-    api = snappi.api(host='https://localhost')
+    api = snappi.api(location="https://localhost")
     # and an empty traffic configuration to be pushed to controller later on
     cfg = api.config()
 
     # add two ports where location points to traffic-engine (aka ports)
-    p1, p2 = (
-        cfg.ports
-        .port(name='p1', location='localhost:5555')
-        .port(name='p2', location='localhost:5556')
+    p1, p2 = cfg.ports.port(name="p1", location="localhost:5555").port(
+        name="p2", location="localhost:5556"
     )
 
     # add layer 1 property to configure same speed on both ports
-    ly = cfg.layer1.layer1(name='ly')[-1]
+    ly = cfg.layer1.layer1(name="ly")[-1]
     ly.port_names = [p1.name, p2.name]
     ly.speed = ly.SPEED_1_GBPS
 
     # enable packet capture on both ports
-    cp = cfg.captures.capture(name='cp')[-1]
+    cp = cfg.captures.capture(name="cp")[-1]
     cp.port_names = [p1.name, p2.name]
 
     # add two traffic flows
-    f1, f2 = cfg.flows.flow(name='flow p1->p2').flow(name='flow p2->p1')
+    f1, f2 = cfg.flows.flow(name="flow p1->p2").flow(name="flow p2->p1")
     # and assign source and destination ports for each
     f1.tx_rx.port.tx_name, f1.tx_rx.port.rx_name = p1.name, p2.name
     f2.tx_rx.port.tx_name, f2.tx_rx.port.rx_name = p2.name, p1.name
@@ -50,12 +48,12 @@ def hello_snappi():
     eth2, ip2, udp2 = f2.packet.ethernet().ipv4().udp()
 
     # set source and destination MAC addresses
-    eth1.src.value, eth1.dst.value = '00:AA:00:00:04:00', '00:AA:00:00:00:AA'
-    eth2.src.value, eth2.dst.value = '00:AA:00:00:00:AA', '00:AA:00:00:04:00'
+    eth1.src.value, eth1.dst.value = "00:AA:00:00:04:00", "00:AA:00:00:00:AA"
+    eth2.src.value, eth2.dst.value = "00:AA:00:00:00:AA", "00:AA:00:00:04:00"
 
     # set source and destination IPv4 addresses
-    ip1.src.value, ip1.dst.value = '10.0.0.1', '10.0.0.2'
-    ip2.src.value, ip2.dst.value = '10.0.0.2', '10.0.0.1'
+    ip1.src.value, ip1.dst.value = "10.0.0.1", "10.0.0.2"
+    ip2.src.value, ip2.dst.value = "10.0.0.2", "10.0.0.1"
 
     # set incrementing port numbers as source UDP ports
     udp1.src_port.increment.start = 5000
@@ -70,26 +68,26 @@ def hello_snappi():
     udp1.dst_port.values = [4000, 4044, 4060, 4074]
     udp2.dst_port.values = [8000, 8044, 8060, 8074, 8082, 8084]
 
-    print('Pushing traffic configuration ...')
+    print("Pushing traffic configuration ...")
     api.set_config(cfg)
 
-    print('Starting packet capture on all configured ports ...')
+    print("Starting packet capture on all configured ports ...")
     cs = api.capture_state()
     cs.state = cs.START
     api.set_capture_state(cs)
 
-    print('Starting transmit on all configured flows ...')
+    print("Starting transmit on all configured flows ...")
     ts = api.transmit_state()
     ts.state = ts.START
     api.set_transmit_state(ts)
 
-    print('Checking metrics on all configured ports ...')
-    print('Expected\tTotal Tx\tTotal Rx')
-    assert wait_for(lambda: metrics_ok(api, cfg)), 'Metrics validation failed!'
+    print("Checking metrics on all configured ports ...")
+    print("Expected\tTotal Tx\tTotal Rx")
+    assert wait_for(lambda: metrics_ok(api, cfg)), "Metrics validation failed!"
 
-    assert captures_ok(api, cfg), 'Capture validation failed!'
+    assert captures_ok(api, cfg), "Capture validation failed!"
 
-    print('Test passed !')
+    print("Test passed !")
 
 
 def metrics_ok(api, cfg):
@@ -106,15 +104,16 @@ def metrics_ok(api, cfg):
     total_rx = sum([m.frames_rx for m in res.port_metrics])
     expected = sum([f.duration.fixed_packets.packets for f in cfg.flows])
 
-    print('%d\t\t%d\t\t%d' % (expected, total_tx, total_rx))
+    print("%d\t\t%d\t\t%d" % (expected, total_tx, total_rx))
 
     return expected == total_tx and total_rx >= expected
 
 
 def captures_ok(api, cfg):
     import dpkt
-    print('Checking captured packets on all configured ports ...')
-    print('Port Name\tExpected\tUDP packets')
+
+    print("Checking captured packets on all configured ports ...")
+    print("Port Name\tExpected\tUDP packets")
 
     result = []
     for p in cfg.ports:
@@ -130,7 +129,7 @@ def captures_ok(api, cfg):
             if isinstance(eth.data.data, dpkt.udp.UDP):
                 act += 1
 
-        print('%s\t\t%d\t\t%d' % (p.name, exp, act))
+        print("%s\t\t%d\t\t%d" % (p.name, exp, act))
         result.append(exp == act)
 
     return all(result)
@@ -142,6 +141,7 @@ def wait_for(func, timeout=10, interval=0.2):
     every `interval` seconds.
     """
     import time
+
     start = time.time()
 
     while time.time() - start <= timeout:
@@ -149,9 +149,9 @@ def wait_for(func, timeout=10, interval=0.2):
             return True
         time.sleep(interval)
 
-    print('Timeout occurred !')
+    print("Timeout occurred !")
     return False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     hello_snappi()

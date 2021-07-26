@@ -1,5 +1,3 @@
-
-
 def test_tcp_bidir_flows(api, utils):
     """
     Configure raw TCP bi-directional flows, each with,
@@ -12,12 +10,15 @@ def test_tcp_bidir_flows(api, utils):
     config = api.config()
     api.set_config(config)
     # load JSON config from configs/
-    with open(utils.get_test_config_path('tcp_bidir_flows.json')) as f:
+    with open(utils.get_test_config_path("tcp_bidir_flows.json")) as f:
         config.deserialize(f.read())
 
     # update port locations
     config.ports[0].location = utils.settings.ports[0]
     config.ports[1].location = utils.settings.ports[1]
+
+    config.layer1[0].speed = utils.settings.speed
+    config.layer1[0].media = utils.settings.media
     # this will allow us to take over ports that may already be in use
     config.options.port_options.location_preemption = True
 
@@ -29,7 +30,8 @@ def test_tcp_bidir_flows(api, utils):
 
     utils.wait_for(
         lambda: results_ok(api, utils, size, packets * 2),
-        'stats to be as expected', timeout_seconds=10
+        "stats to be as expected",
+        timeout_seconds=10,
     )
 
 

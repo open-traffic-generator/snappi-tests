@@ -31,7 +31,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
   # sample for ixia-c testbed
   {
     # controller address
-    "api_server": "https://localhost",
+    "location": "https://localhost",
     "ports": [
         # traffic engine addresses 
         "localhost:5555",
@@ -45,7 +45,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
   # sample for ixnetwork testbed
   {
     # IxNetwork API Server address
-    "api_server": "https://192.168.1.1:443",
+    "location": "https://192.168.1.1:443",
     "ports": [
         # chassis;card;port
         "192.168.2.1;6;1",

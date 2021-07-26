@@ -2,12 +2,11 @@ import pytest
 import snappi_convergence
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def cvg_api():
-    api = snappi_convergence.api(location='localhost:443',
-                                 ext='ixnetwork')
+    api = snappi_convergence.api(location="localhost:443", ext="ixnetwork")
     yield api
-    if getattr(api, 'assistant', None) is not None:
+    if getattr(api, "assistant", None) is not None:
         api.assistant.Session.remove()
 
 
@@ -24,23 +23,21 @@ def bgp_convergence_config(utils, cvg_api):
     config = conv_config.config
 
     tx, rx1, rx2 = (
-        config.ports
-        .port(name='tx', location=utils.settings.ports[0])
-        .port(name='rx1', location=utils.settings.ports[1])
-        .port(name='rx2', location=utils.settings.ports[2])
+        config.ports.port(name="tx", location=utils.settings.ports[0])
+        .port(name="rx1", location=utils.settings.ports[1])
+        .port(name="rx2", location=utils.settings.ports[2])
     )
 
     config.options.port_options.location_preemption = True
     ly = config.layer1.layer1()[-1]
-    ly.name = 'ly'
+    ly.name = "ly"
     ly.port_names = [tx.name, rx1.name, rx2.name]
     ly.ieee_media_defaults = True
     ly.auto_negotiate = False
     ly.speed = utils.settings.speed
 
     tx_device, rx1_device, rx2_device = (
-        config.devices
-        .device(name="tx_device", container_name=tx.name)
+        config.devices.device(name="tx_device", container_name=tx.name)
         .device(name="rx1_device", container_name=rx1.name)
         .device(name="rx2_device", container_name=rx2.name)
     )
@@ -71,9 +68,9 @@ def bgp_convergence_config(utils, cvg_api):
     rx1_bgpv4.as_number = 65200
     rx1_bgpv4.local_address = "22.1.1.2"
     rx1_rr = rx1_bgpv4.bgpv4_routes.bgpv4route(name="rx1_rr")[-1]
-    rx1_rr.addresses.bgpv4routeaddress(count=1000,
-                                       address='200.1.0.1',
-                                       prefix=32)
+    rx1_rr.addresses.bgpv4routeaddress(
+        count=1000, address="200.1.0.1", prefix=32
+    )
 
     # rx2_device config
     rx2_eth = rx2_device.ethernet
@@ -92,12 +89,12 @@ def bgp_convergence_config(utils, cvg_api):
     rx2_bgpv4.as_number = 65200
 
     rx2_rr = rx2_bgpv4.bgpv4_routes.bgpv4route(name="rx2_rr")[-1]
-    rx2_rr.addresses.bgpv4routeaddress(count=1000,
-                                       address='200.1.0.1',
-                                       prefix=32)
+    rx2_rr.addresses.bgpv4routeaddress(
+        count=1000, address="200.1.0.1", prefix=32
+    )
 
     # flow config
-    flow = config.flows.flow(name='convergence_test')[-1]
+    flow = config.flows.flow(name="convergence_test")[-1]
     flow.tx_rx.device.tx_names = [tx_device.name]
     flow.tx_rx.device.rx_names = [rx1_rr.name, rx2_rr.name]
 
@@ -108,13 +105,14 @@ def bgp_convergence_config(utils, cvg_api):
     return conv_config
 
 
-PRIMARY_ROUTES_NAME = 'rx1_rr'
-SECONDARY_ROUTES_NAME = 'rx2_rr'
-PRIMARY_PORT_NAME = 'rx1'
+PRIMARY_ROUTES_NAME = "rx1_rr"
+SECONDARY_ROUTES_NAME = "rx2_rr"
+PRIMARY_PORT_NAME = "rx1"
 # maximum convergence 3s
 MAX_CON = 3000000
 
 
+@pytest.mark.dut
 def test_bgp_cp_dp_convergence(utils, cvg_api, bgp_convergence_config):
     """
     5. set advanced metric settings & start traffic
@@ -126,7 +124,8 @@ def test_bgp_cp_dp_convergence(utils, cvg_api, bgp_convergence_config):
     # convergence config
     bgp_convergence_config.rx_rate_threshold = 90
     bgp_convergence_config.convergence_event = (
-        bgp_convergence_config.ROUTE_ADVERTISE_WITHDRAW)
+        bgp_convergence_config.ROUTE_ADVERTISE_WITHDRAW
+    )
 
     cvg_api.set_config(bgp_convergence_config)
 
@@ -138,7 +137,7 @@ def test_bgp_cp_dp_convergence(utils, cvg_api, bgp_convergence_config):
     # Wait for traffic to reach configured line rate
     utils.wait_for(
         lambda: is_traffic_started(cvg_api),
-        'traffic to start and reach configured line rate'
+        "traffic to start and reach configured line rate",
     )
 
     # Withdraw routes from primary path
@@ -149,7 +148,7 @@ def test_bgp_cp_dp_convergence(utils, cvg_api, bgp_convergence_config):
 
     # Wait for traffic to converge
     utils.wait_for(
-        lambda: is_traffic_converged(cvg_api), 'traffic to converge'
+        lambda: is_traffic_converged(cvg_api), "traffic to converge"
     )
 
     # get convergence metrics
@@ -167,8 +166,12 @@ def is_traffic_started(cvg_api):
     Returns true if traffic in start state
     """
     flow_stats = get_flow_stats(cvg_api)
-    return all([int(fs.frames_rx_rate) == int(fs.frames_tx_rate) / 2
-               for fs in flow_stats])
+    return all(
+        [
+            int(fs.frames_rx_rate) == int(fs.frames_tx_rate) / 2
+            for fs in flow_stats
+        ]
+    )
 
 
 def is_traffic_converged(cvg_api):
@@ -176,8 +179,13 @@ def is_traffic_converged(cvg_api):
     Returns true if traffic in stop state
     """
     flow_stats = get_flow_stats(cvg_api)
-    return all([int(fs.frames_tx_rate) == int(fs.frames_rx_rate)
-               for fs in flow_stats if fs.port_rx == 'rx2'])
+    return all(
+        [
+            int(fs.frames_tx_rate) == int(fs.frames_rx_rate)
+            for fs in flow_stats
+            if fs.port_rx == "rx2"
+        ]
+    )
 
 
 def get_flow_stats(cvg_api):

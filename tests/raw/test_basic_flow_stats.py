@@ -11,26 +11,26 @@ def test_basic_flow_stats(settings):
     - frames transmitted and received for configured flow is as expected
     """
     # host, port locations and ext is fetched from settings.json
-    api = snappi.api(host=settings.api_server, ext=settings.ext)
+    api = snappi.api(location=settings.location, ext=settings.ext)
 
     config = api.config()
-    api.set_config(config)
-    tx, rx = (
-        config.ports
-        .port(name='tx', location=settings.ports[0])
-        .port(name='rx', location=settings.ports[1])
+    tx, rx = config.ports.port(name="tx", location=settings.ports[0]).port(
+        name="rx", location=settings.ports[1]
     )
+    # this will allow us to take over ports that may already be in use
+    config.options.port_options.location_preemption = True
+
     # configure layer 1 properties
-    ly, = config.layer1.layer1(name='ly')
+    ly = config.layer1.layer1(name="ly")[-1]
     ly.port_names = [tx.name, rx.name]
     ly.speed = settings.speed
     ly.media = settings.media
     # configure capture
-    cap, = config.captures.capture(name='cap')
+    cap = config.captures.capture(name="cap")[-1]
     cap.port_names = [rx.name]
     cap.format = cap.PCAP
     # configure flow properties
-    flw, = config.flows.flow(name='flw')
+    flw = config.flows.flow(name="flw")[-1]
     # flow endpoints
     flw.tx_rx.port.tx_name = tx.name
     flw.tx_rx.port.rx_name = rx.name
@@ -58,14 +58,12 @@ def test_basic_flow_stats(settings):
     # wait for flow metrics to be as expected
     while True:
         res = api.get_metrics(req)
-        if all(
-            [1000 == m.frames_rx for m in res.flow_metrics]
-        ):
+        if all([1000 == m.frames_rx for m in res.flow_metrics]):
             break
     # get capture
     cr = api.capture_request()
     cr.port_name = rx.name
     pcap_bytes = api.get_capture(cr)
     # generate pcap in pwd
-    with open('out.pcap', 'wb') as out:
+    with open("out.pcap", "wb") as out:
         out.write(pcap_bytes.read())

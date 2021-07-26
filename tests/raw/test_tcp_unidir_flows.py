@@ -1,5 +1,3 @@
-
-
 def test_tcp_unidir_flows(api, utils):
     """
     Configure a raw TCP flow with,
@@ -11,19 +9,17 @@ def test_tcp_unidir_flows(api, utils):
     """
     config = api.config()
 
-    tx, rx = (
-        config.ports
-        .port(name='tx', location=utils.settings.ports[0])
-        .port(name='rx', location=utils.settings.ports[1])
-    )
+    tx, rx = config.ports.port(
+        name="tx", location=utils.settings.ports[0]
+    ).port(name="rx", location=utils.settings.ports[1])
 
     ly = config.layer1.layer1()[-1]
-    ly.name = 'ly'
+    ly.name = "ly"
     ly.port_names = [tx.name, rx.name]
     ly.media = utils.settings.media
     ly.speed = utils.settings.speed
 
-    flow = config.flows.flow(name='tx_flow')[-1]
+    flow = config.flows.flow(name="tx_flow")[-1]
     flow.tx_rx.port.tx_name = tx.name
     flow.tx_rx.port.rx_name = rx.name
     flow.metrics.enable = True
@@ -35,11 +31,11 @@ def test_tcp_unidir_flows(api, utils):
 
     eth, ip, tcp = flow.packet.ethernet().ipv4().tcp()
 
-    eth.src.value = '00:CD:DC:CD:DC:CD'
-    eth.dst.value = '00:AB:BC:AB:BC:AB'
+    eth.src.value = "00:CD:DC:CD:DC:CD"
+    eth.dst.value = "00:AB:BC:AB:BC:AB"
 
-    ip.src.value = '1.1.1.2'
-    ip.dst.value = '1.1.1.1'
+    ip.src.value = "1.1.1.2"
+    ip.dst.value = "1.1.1.1"
 
     tcp.src_port.values = [5000, 5050, 5015, 5040, 5032, 5021]
     tcp.dst_port.values = [6000, 6015, 6050]
@@ -50,7 +46,8 @@ def test_tcp_unidir_flows(api, utils):
     utils.start_traffic(api, config, False)
     utils.wait_for(
         lambda: results_ok(api, utils, size, packets),
-        'stats to be as expected', timeout_seconds=10
+        "stats to be as expected",
+        timeout_seconds=10,
     )
 
 
