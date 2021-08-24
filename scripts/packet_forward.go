@@ -3,16 +3,19 @@ package main
 import (
 	"log"
 
-	// tested with github.com/open-traffic-generator/snappi/gosnappi@v0.4.34
+	// tested with github.com/open-traffic-generator/snappi/gosnappi@v0.4.36
 	"github.com/open-traffic-generator/snappi/gosnappi"
 )
 
 func main() {
+
+	gosnappi.StartMockServer("localhost:50001")
+
 	api := gosnappi.NewApi()
-	api.NewGrpcTransport().SetLocation("localhost:40051")
+	api.NewGrpcTransport().SetLocation("localhost:50001")
 	config := PacketForwardConfig(api)
 
-	if false {
+	if true {
 		_, err := api.SetConfig(config)
 		if err != nil {
 			log.Fatal(err)
@@ -206,8 +209,7 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 
 	// add endpoints and packet description flow 1
 	f1 := config.Flows().Items()[0]
-	f1.
-		SetName(p1.Name() + " -> " + p2.Name()).
+	f1.SetName(p1.Name() + " -> " + p2.Name()).
 		TxRx().Port().SetTxName(p1.Name()).SetRxName(p2.Name())
 
 	f1Eth := f1.Packet().Add().Ethernet()
