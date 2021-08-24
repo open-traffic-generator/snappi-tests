@@ -3,12 +3,36 @@ package main
 import (
 	"log"
 
+	// tested with github.com/open-traffic-generator/snappi/gosnappi@v0.4.34
 	"github.com/open-traffic-generator/snappi/gosnappi"
 )
 
 func main() {
 	api := gosnappi.NewApi()
 	api.NewGrpcTransport().SetLocation("localhost:40051")
+	config := PacketForwardConfig(api)
+
+	if false {
+		_, err := api.SetConfig(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		req := api.NewMetricsRequest()
+		req.Bgpv4()
+		for i := 0; i < 10; i++ {
+			res, err := api.GetMetrics(req)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// TODO: cannot extract further from response
+			log.Println(res)
+		}
+	}
+}
+
+func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 
 	config := api.NewConfig()
 
@@ -50,7 +74,8 @@ func main() {
 		SetName("d1Bgp").
 		SetDutAddress("1.1.1.2").
 		SetRouterId("1.1.1.1").
-		SetAsNumber(1111)
+		SetAsNumber(1111).
+		SetAsType(gosnappi.DeviceBgpv4AsType.EBGP)
 
 	d1BgpRoute := d1Bgp.Bgpv4Routes().Add().
 		SetName("d1BgpRoute").
@@ -64,14 +89,20 @@ func main() {
 
 	d1BgpRoute.Communities().Add().
 		SetAsNumber(1).
-		SetAsCustom(2)
+		SetAsCustom(2).
+		SetCommunityType(gosnappi.DeviceBgpCommunityCommunityType.MANUAL_AS_NUMBER)
 
 	d1BgpRoute.AsPath().
 		SetOverridePeerAsSetMode(true).
-		AsPathSegments().Add().SetAsNumbers([]int32{1112, 1113})
+		SetAsSetMode(gosnappi.DeviceBgpAsPathAsSetMode.INCLUDE_AS_SET)
+
+	d1BgpRoute.AsPath().AsPathSegments().Add().
+		SetAsNumbers([]int32{1112, 1113}).
+		SetSegmentType(gosnappi.DeviceBgpAsPathSegmentSegmentType.AS_SEQ)
 
 	d1BgpRoute.Advanced().
-		SetMultiExitDiscriminator(50)
+		SetMultiExitDiscriminator(50).
+		SetOrigin(gosnappi.DeviceBgpRouteAdvancedOrigin.EGP)
 
 	// add protocol stacks for device d2
 	d2Eth := d2.Ethernet().
@@ -93,7 +124,8 @@ func main() {
 		SetName("d2Bgp").
 		SetDutAddress("2.2.2.1").
 		SetRouterId("2.2.2.2").
-		SetAsNumber(2222)
+		SetAsNumber(2222).
+		SetAsType(gosnappi.DeviceBgpv4AsType.EBGP)
 
 	d2BgpRoute := d2Bgp.Bgpv4Routes().Add().
 		SetName("d2BgpRoute").
@@ -107,14 +139,20 @@ func main() {
 
 	d2BgpRoute.Communities().Add().
 		SetAsNumber(100).
-		SetAsCustom(2)
+		SetAsCustom(2).
+		SetCommunityType(gosnappi.DeviceBgpCommunityCommunityType.MANUAL_AS_NUMBER)
 
 	d2BgpRoute.AsPath().
 		SetOverridePeerAsSetMode(true).
-		AsPathSegments().Add().SetAsNumbers([]int32{2223, 2224, 2225})
+		SetAsSetMode(gosnappi.DeviceBgpAsPathAsSetMode.INCLUDE_AS_SET)
+
+	d2BgpRoute.AsPath().AsPathSegments().Add().
+		SetAsNumbers([]int32{2223, 2224, 2225}).
+		SetSegmentType(gosnappi.DeviceBgpAsPathSegmentSegmentType.AS_SEQ)
 
 	d2BgpRoute.Advanced().
-		SetMultiExitDiscriminator(40)
+		SetMultiExitDiscriminator(40).
+		SetOrigin(gosnappi.DeviceBgpRouteAdvancedOrigin.EGP)
 
 	// add protocol stacks for device d3
 	d3Eth := d3.Ethernet().
@@ -136,7 +174,8 @@ func main() {
 		SetName("d3Bgp").
 		SetDutAddress("3.3.3.1").
 		SetRouterId("3.3.3.2").
-		SetAsNumber(3332)
+		SetAsNumber(3332).
+		SetAsType(gosnappi.DeviceBgpv4AsType.EBGP)
 
 	d3BgpRoute := d3Bgp.Bgpv4Routes().Add().
 		SetName("d3BgpRoute").
@@ -150,14 +189,20 @@ func main() {
 
 	d3BgpRoute.Communities().Add().
 		SetAsNumber(1).
-		SetAsCustom(2)
+		SetAsCustom(2).
+		SetCommunityType(gosnappi.DeviceBgpCommunityCommunityType.MANUAL_AS_NUMBER)
 
 	d3BgpRoute.AsPath().
 		SetOverridePeerAsSetMode(true).
-		AsPathSegments().Add().SetAsNumbers([]int32{3333, 3334})
+		SetAsSetMode(gosnappi.DeviceBgpAsPathAsSetMode.INCLUDE_AS_SET)
+
+	d3BgpRoute.AsPath().AsPathSegments().Add().
+		SetAsNumbers([]int32{3333, 3334}).
+		SetSegmentType(gosnappi.DeviceBgpAsPathSegmentSegmentType.AS_SEQ)
 
 	d3BgpRoute.Advanced().
-		SetMultiExitDiscriminator(33)
+		SetMultiExitDiscriminator(33).
+		SetOrigin(gosnappi.DeviceBgpRouteAdvancedOrigin.EGP)
 
 	// add endpoints and packet description flow 1
 	f1 := config.Flows().Items()[0]
@@ -228,4 +273,5 @@ func main() {
 	f4Ip.Dst().SetValue("10.10.10.1")
 
 	log.Println(config.ToYaml())
+	return config
 }
