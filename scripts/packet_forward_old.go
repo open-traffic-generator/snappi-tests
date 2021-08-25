@@ -202,6 +202,44 @@ resp, err := client.SetConfigWithResponse(ctx, otgclient.SetConfigJSONRequestBod
                 },
             },
         },
+        {
+            Name:          "DeviceGroup3",
+            ContainerName: rx_port_name,
+            Ethernet: otgclient.DeviceEthernet{
+                Name: "Ethernet1",
+                Mac:  &macAddr2,
+                Mtu:  &mtu,
+                Ipv4: &otgclient.DeviceIpv4{
+                    Name:    "IPv41",
+                    Address: &ipAddress2,
+                    Gateway: &ipGateway2,
+                    Prefix:  &ipPrefix,
+                    Bgpv4: &otgclient.DeviceBgpv4{
+                        Name:         "BGP Peer 1",
+                        LocalAddress: &bgpLocalAddress2,
+                        DutAddress:   &bgpDutAddress2,
+                        RouterId:     &bgpRouterId2,
+                        Active:       &bgpActive,
+                        AsType:       &bgpAsType,
+                        AsNumber:     &bgpAsNumber,
+                        Bgpv4Routes: &[]otgclient.DeviceBgpv4Route{
+                            {
+                                Name:           "RR 1",
+                                NextHopAddress: &nextHopAddress2,
+                                Addresses: &[]otgclient.DeviceBgpv4RouteAddress{
+                                    {
+                                        Address: &routeAddress2,
+                                        Count:   &routeCount,
+                                        Step:    &routeStep,
+                                        Prefix:  &routePrefix,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
 },
 )
