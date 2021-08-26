@@ -1,9 +1,19 @@
+// Steps to get started with this test
+// - Ensure Go is installed on your system
+// - mkdir -p scratch && cd scratch
+// - curl -kLO https://raw.githubusercontent.com/open-traffic-generator/snappi-tests/main/scripts/packet_forward.go
+// - go mod init example/test
+// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.4.37
+// - go run go run packet_forward.go
+// Open any new issues (or search for existing) at:
+// - https://github.com/open-traffic-generator/openapiart/issues (specific to code generation)
+// - https://github.com/open-traffic-generator/snappi/issues (anything related to OTG, apart from code generation)
+
 package main
 
 import (
 	"log"
 
-	// tested with github.com/open-traffic-generator/snappi/gosnappi@v0.4.36
 	"github.com/open-traffic-generator/snappi/gosnappi"
 )
 
