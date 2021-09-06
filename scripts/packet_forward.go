@@ -3,7 +3,7 @@
 // - mkdir -p scratch && cd scratch
 // - curl -kLO https://raw.githubusercontent.com/open-traffic-generator/snappi-tests/main/scripts/packet_forward.go
 // - go mod init example/test
-// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.4.37
+// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.5.3
 // - go run packet_forward.go
 // Open any new issues (or search for existing) at:
 // - https://github.com/open-traffic-generator/openapiart/issues (specific to code generation)
@@ -12,37 +12,68 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/open-traffic-generator/snappi/gosnappi"
 )
 
 func main() {
-
-	gosnappi.StartMockServer("localhost:50001")
-
 	api := gosnappi.NewApi()
-	api.NewGrpcTransport().SetLocation("localhost:50001")
+	if httpTransport := false; httpTransport {
+		log.Println("Using HTTP transport ...")
+		api.NewHttpTransport().SetLocation("https://localhost:443")
+	} else {
+		log.Println("Using gRPC transport ...")
+		api.NewGrpcTransport().SetLocation("localhost:40051")
+	}
+
+	log.Println("Setting config ...")
 	config := PacketForwardConfig(api)
+	warn, err := api.SetConfig(config)
+	LogWarnErr(warn, err)
 
-	if true {
-		_, err := api.SetConfig(config)
-		if err != nil {
-			log.Fatal(err)
-		}
-
+	err = WaitFor(func() (bool, error) {
 		req := api.NewMetricsRequest()
 		req.Bgpv4()
-		for i := 0; i < 10; i++ {
-			res, err := api.GetMetrics(req)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			// TODO: cannot extract further from response
-			log.Println(res)
+		res, err := api.GetMetrics(req)
+		if err != nil {
+			return false, err
 		}
-	}
+
+		log.Println("\n" + res.ToYaml())
+		for _, row := range res.Bgpv4Metrics().Items() {
+			if row.RoutesReceived() != 4 {
+				return false, nil
+			}
+		}
+		return true, nil
+	}, "bgpv4 metrics to be ok")
+	LogWarnErr(nil, err)
+
+	log.Println("Starting transmit ...")
+	ts := api.NewTransmitState().SetState(gosnappi.TransmitStateState.START)
+	warn, err = api.SetTransmitState(ts)
+	LogWarnErr(warn, err)
+
+	err = WaitFor(func() (bool, error) {
+		req := api.NewMetricsRequest()
+		req.Flow()
+		res, err := api.GetMetrics(req)
+		if err != nil {
+			return false, err
+		}
+
+		log.Println("\n" + res.ToYaml())
+		for _, row := range res.FlowMetrics().Items() {
+			if row.FramesRx() != 1000 {
+				return false, nil
+			}
+		}
+		return true, nil
+	}, "flow metrics to be ok")
+	LogWarnErr(nil, err)
 }
 
 func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
@@ -50,9 +81,9 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	config := api.NewConfig()
 
 	// add ports
-	p1 := config.Ports().Add().SetName("p1").SetLocation("service-ixia-c-port1.ixia-c")
-	p2 := config.Ports().Add().SetName("p2").SetLocation("service-ixia-c-port2.ixia-c")
-	p3 := config.Ports().Add().SetName("p3").SetLocation("service-ixia-c-port3.ixia-c")
+	p1 := config.Ports().Add().SetName("p1").SetLocation("service-ixia-c-port1.ixia-c:5555+service-ixia-c-port1.ixia-c:50071")
+	p2 := config.Ports().Add().SetName("p2").SetLocation("service-ixia-c-port2.ixia-c:5555+service-ixia-c-port2.ixia-c:50071")
+	p3 := config.Ports().Add().SetName("p3").SetLocation("service-ixia-c-port3.ixia-c:5555+service-ixia-c-port3.ixia-c:50071")
 
 	// add devices
 	d1 := config.Devices().Add().SetName("d1").SetContainerName(p1.Name())
@@ -72,10 +103,6 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 		SetName("d1Eth").
 		SetMac("00:00:01:01:01:01").
 		SetMtu(1500)
-
-	d1Eth.Vlans().Add().
-		SetName("d1Vlan").
-		SetId(100)
 
 	d1Ip := d1Eth.Ipv4().
 		SetName("d1Ip").
@@ -123,10 +150,6 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 		SetMac("00:00:02:02:02:02").
 		SetMtu(1500)
 
-	d2Eth.Vlans().Add().
-		SetName("d2Vlan").
-		SetId(200)
-
 	d2Ip := d2Eth.Ipv4().
 		SetName("d2Ip").
 		SetAddress("2.2.2.2").
@@ -173,10 +196,6 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 		SetMac("00:00:03:03:03:02").
 		SetMtu(1500)
 
-	d3Eth.Vlans().Add().
-		SetName("d3Vlan").
-		SetId(300)
-
 	d3Ip := d3Eth.Ipv4().
 		SetName("d3Ip").
 		SetAddress("3.3.3.2").
@@ -220,14 +239,13 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	// add endpoints and packet description flow 1
 	f1 := config.Flows().Items()[0]
 	f1.SetName(p1.Name() + " -> " + p2.Name()).
-		TxRx().Port().SetTxName(p1.Name()).SetRxName(p2.Name())
+		TxRx().Device().
+		SetTxNames([]string{d1BgpRoute.Name()}).
+		SetRxNames([]string{d2BgpRoute.Name()})
 
 	f1Eth := f1.Packet().Add().Ethernet()
 	f1Eth.Src().SetValue(d1Eth.Mac())
-
-	f1Vlan := f1.Packet().Add().Vlan()
-	f1Vlan.Id().SetValue(d1Eth.Vlans().Items()[0].Id())
-	f1Vlan.Tpid().SetValue(33024)
+	f1Eth.Dst().SetValue("00:00:00:00:00:00")
 
 	f1Ip := f1.Packet().Add().Ipv4()
 	f1Ip.Src().SetValue("10.10.10.1")
@@ -235,16 +253,14 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 
 	// add endpoints and packet description flow 2
 	f2 := config.Flows().Items()[1]
-	f2.
-		SetName(p1.Name() + " -> " + p3.Name()).
-		TxRx().Port().SetTxName(p1.Name()).SetRxName(p3.Name())
+	f2.SetName(p1.Name() + " -> " + p3.Name()).
+		TxRx().Device().
+		SetTxNames([]string{d1BgpRoute.Name()}).
+		SetRxNames([]string{d3BgpRoute.Name()})
 
 	f2Eth := f2.Packet().Add().Ethernet()
 	f2Eth.Src().SetValue(d1Eth.Mac())
-
-	f2Vlan := f2.Packet().Add().Vlan()
-	f2Vlan.Id().SetValue(d1Eth.Vlans().Items()[0].Id())
-	f2Vlan.Tpid().SetValue(33024)
+	f2Eth.Dst().SetValue("00:00:00:00:00:00")
 
 	f2Ip := f2.Packet().Add().Ipv4()
 	f2Ip.Src().SetValue("10.10.10.1")
@@ -252,16 +268,14 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 
 	// add endpoints and packet description flow 3
 	f3 := config.Flows().Items()[2]
-	f3.
-		SetName(p2.Name() + " -> " + p1.Name()).
-		TxRx().Port().SetTxName(p2.Name()).SetRxName(p1.Name())
+	f3.SetName(p2.Name() + " -> " + p1.Name()).
+		TxRx().Device().
+		SetTxNames([]string{d2BgpRoute.Name()}).
+		SetRxNames([]string{d1BgpRoute.Name()})
 
 	f3Eth := f3.Packet().Add().Ethernet()
 	f3Eth.Src().SetValue(d2Eth.Mac())
-
-	f3Vlan := f3.Packet().Add().Vlan()
-	f3Vlan.Id().SetValue(d2Eth.Vlans().Items()[0].Id())
-	f3Vlan.Tpid().SetValue(33024)
+	f3Eth.Dst().SetValue("00:00:00:00:00:00")
 
 	f3Ip := f3.Packet().Add().Ipv4()
 	f3Ip.Src().SetValue("20.20.20.1")
@@ -269,16 +283,14 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 
 	// add endpoints and packet description flow 4
 	f4 := config.Flows().Items()[3]
-	f4.
-		SetName(p3.Name() + " -> " + p1.Name()).
-		TxRx().Port().SetTxName(p3.Name()).SetRxName(p1.Name())
+	f4.SetName(p3.Name() + " -> " + p1.Name()).
+		TxRx().Device().
+		SetTxNames([]string{d3BgpRoute.Name()}).
+		SetRxNames([]string{d1BgpRoute.Name()})
 
 	f4Eth := f4.Packet().Add().Ethernet()
 	f4Eth.Src().SetValue(d3Eth.Mac())
-
-	f4Vlan := f4.Packet().Add().Vlan()
-	f4Vlan.Id().SetValue(d3Eth.Vlans().Items()[0].Id())
-	f4Vlan.Tpid().SetValue(33024)
+	f4Eth.Dst().SetValue("00:00:00:00:00:00")
 
 	f4Ip := f4.Packet().Add().Ipv4()
 	f4Ip.Src().SetValue("30.30.30.1")
@@ -286,4 +298,35 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 
 	log.Println(config.ToYaml())
 	return config
+}
+
+func LogWarnErr(warn gosnappi.ResponseWarning, err error) {
+	if err != nil {
+		log.Printf("ERROR: %v\n", err)
+	} else if warn != nil {
+		for _, w := range warn.Warnings() {
+			log.Printf("WARNING: %v\n", w)
+		}
+	}
+}
+
+func WaitFor(fn func() (bool, error), condition string) error {
+	start := time.Now()
+	log.Printf("Waiting for %s ...\n", condition)
+
+	for {
+		done, err := fn()
+		if err != nil {
+			return fmt.Errorf("error waiting for %s: %v", condition, err)
+		}
+		if done {
+			log.Printf("Done waiting for %s\n", condition)
+			return nil
+		}
+
+		if time.Since(start) > 30*time.Second {
+			return fmt.Errorf("timeout occurred while waiting for %s", condition)
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
 }
