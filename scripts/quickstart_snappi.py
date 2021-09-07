@@ -1,6 +1,6 @@
 import snappi
 
-# create a new API instance where host points to controller
+# create a new API instance where location points to controller
 api = snappi.api(location="https://localhost")
 
 # create a config object to be pushed to controller
