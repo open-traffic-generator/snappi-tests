@@ -16,10 +16,10 @@ def test_udp_header_with_counter(api, b2b_raw_config, utils):
     size = 74
     flow.packet.ethernet().ipv4().udp()
     eth, ip, udp = flow.packet[0], flow.packet[1], flow.packet[2]
-    eth.src.value = '00:0c:29:1d:10:67'
-    eth.dst.value = '00:0c:29:1d:10:71'
-    ip.src.value = '10.10.10.1'
-    ip.dst.value = '10.10.10.2'
+    eth.src.value = "00:0c:29:1d:10:67"
+    eth.dst.value = "00:0c:29:1d:10:71"
+    ip.src.value = "10.10.10.1"
+    ip.dst.value = "10.10.10.2"
     udp.src_port.increment.start = 5000
     udp.src_port.increment.step = 2
     udp.src_port.increment.count = 10
@@ -28,19 +28,18 @@ def test_udp_header_with_counter(api, b2b_raw_config, utils):
     udp.dst_port.decrement.count = 10
     udp.length.increment.start = 35
     udp.length.increment.step = 1
-    udp.length.increment.count = 2
+    udp.length.increment.count = 3
     udp.checksum.GOOD
     flow.duration.fixed_packets.packets = packets
     flow.size.fixed = size
     flow.rate.percentage = 10
 
     flow.metrics.enable = True
-    flow.metrics.loss = True
 
     utils.start_traffic(api, b2b_raw_config)
     utils.wait_for(
         lambda: results_ok(api, size, packets, utils),
-        'stats to be as expected'
+        "stats to be as expected",
     )
 
     captures_ok(api, b2b_raw_config, size, utils)
@@ -62,7 +61,7 @@ def captures_ok(api, cfg, size, utils):
     """
     src = [src_port for src_port in range(5000, 5020, 2)]
     dst = [dst_port for dst_port in range(6000, 5980, -2)]
-    length = [35, 36]
+    length = 36
     cap_dict = utils.get_all_captures(api, cfg)
     assert len(cap_dict) == 1
 
@@ -72,7 +71,8 @@ def captures_ok(api, cfg, size, utils):
         for packet in cap_dict[k]:
             assert utils.to_hex(packet[34:36]) == hex(src[i])
             assert utils.to_hex(packet[36:38]) == hex(dst[i])
-            assert utils.to_hex(packet[38:40]) == hex(length[j])
+            # Length field value can't be assigned manually. 
+            assert utils.to_hex(packet[38:40]) == hex(length)
             assert len(packet) == size
             i = (i + 1) % 10
             j = (j + 1) % 2
