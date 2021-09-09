@@ -1,3 +1,9 @@
+import pytest
+
+
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/443"
+)
 def test_raw_tcp_flow_capture(api, utils):
     """
     Configures the 2 raw flows ipv4 and ipv6 with dual stack and tcp,

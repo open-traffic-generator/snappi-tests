@@ -1,6 +1,9 @@
 import pytest
 
 
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/443"
+)
 @pytest.mark.device
 def test_ip_v4v6_device_and_raw_capture(api, utils):
     """
