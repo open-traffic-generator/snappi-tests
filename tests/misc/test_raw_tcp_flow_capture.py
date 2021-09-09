@@ -1,3 +1,9 @@
+import pytest
+
+
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/443"
+)
 def test_raw_tcp_flow_capture(api, utils):
     """
     Configures the 2 raw flows ipv4 and ipv6 with dual stack and tcp,
@@ -11,17 +17,17 @@ def test_raw_tcp_flow_capture(api, utils):
 
     size = 256
     packets = 1000
-    src_mac = '00:10:10:20:20:10'
-    dst_mac = '00:10:10:20:20:20'
-    mac_step = '00:00:00:00:00:01'
+    src_mac = "00:10:10:20:20:10"
+    dst_mac = "00:10:10:20:20:20"
+    mac_step = "00:00:00:00:00:01"
 
-    src_ipv4 = '10.1.1.1'
-    dst_ipv4 = '10.1.1.2'
-    ipv4_step = '0.0.1.0'
+    src_ipv4 = "10.1.1.1"
+    dst_ipv4 = "10.1.1.2"
+    ipv4_step = "0.0.1.0"
 
-    src_ipv6 = 'abcd::1a'
-    dst_ipv6 = 'abcd::2a'
-    ipv6_step = '1::'
+    src_ipv6 = "abcd::1a"
+    dst_ipv6 = "abcd::2a"
+    ipv6_step = "1::"
 
     src_tcp = 5000
     dst_tcp = 2000
@@ -30,27 +36,21 @@ def test_raw_tcp_flow_capture(api, utils):
     count = 10
 
     # Ports configuration
-    tx, rx = (
-        config.ports
-        .port(name='tx', location=utils.settings.ports[0])
-        .port(name='rx', location=utils.settings.ports[1])
-    )
+    tx, rx = config.ports.port(
+        name="tx", location=utils.settings.ports[0]
+    ).port(name="rx", location=utils.settings.ports[1])
     l1 = config.layer1.layer1()[-1]
-    l1.name = 'L1 Settings'
+    l1.name = "L1 Settings"
     l1.port_names = [tx.name, rx.name]
     l1.speed = utils.settings.speed
     l1.media = utils.settings.media
 
-    cap = config.captures.capture(name='c1')[-1]
+    cap = config.captures.capture(name="c1")[-1]
     cap.port_names = [rx.name]
     cap.format = cap.PCAP
 
     # Flows configuration
-    f1, f2 = (
-        config.flows
-        .flow(name='FlowIpv4Raw')
-        .flow(name='FlowIpv6Raw')
-    )
+    f1, f2 = config.flows.flow(name="FlowIpv4Raw").flow(name="FlowIpv6Raw")
 
     f1.tx_rx.port.tx_name = tx.name
     f1.tx_rx.port.rx_name = rx.name
@@ -115,24 +115,23 @@ def test_raw_tcp_flow_capture(api, utils):
     f2.duration.fixed_packets.packets = packets
 
     f1.metrics.enable = True
-    f1.metrics.loss = True
 
     f2.metrics.enable = True
-    f2.metrics.loss = True
 
     # Starting transmit on flows
     utils.start_traffic(api, config)
 
-    print('Analyzing flow and port metrics ...')
+    print("Analyzing flow and port metrics ...")
     utils.wait_for(
         lambda: results_ok(api, utils, size, packets * 2),
-        'stats to be as expected', timeout_seconds=10
+        "stats to be as expected",
+        timeout_seconds=10,
     )
 
-    print('Stopping transmit ...')
+    print("Stopping transmit ...")
     utils.stop_traffic(api)
 
-    print('Capture validation ...')
+    print("Capture validation ...")
     captures_ok(api, config, utils, size, packets * 2)
 
 
@@ -142,9 +141,7 @@ def results_ok(api, utils, size, packets):
     """
     port_results, flow_results = utils.get_all_stats(api)
     frames_ok = utils.total_frames_ok(port_results, flow_results, packets)
-    bytes_ok = utils.total_bytes_ok(
-        port_results, flow_results, packets * size
-    )
+    bytes_ok = utils.total_bytes_ok(port_results, flow_results, packets * size)
     return frames_ok and bytes_ok
 
 
@@ -154,30 +151,56 @@ def captures_ok(api, cfg, utils, size, packets):
     """
     src_mac = [[0x00, 0x10, 0x10, 0x20, 0x20, 0x10 + i] for i in range(10)]
     dst_mac = [[0x00, 0x10, 0x10, 0x20, 0x20, 0x20 - i] for i in range(10)]
-    src_ip = [[0x0a, 0x01, 0x01 + i, 0x01] for i in range(10)]
-    dst_ip = [[0x0a, 0x01, 0x01 + i, 0x02] for i in range(10)]
+    src_ip = [[0x0A, 0x01, 0x01 + i, 0x01] for i in range(10)]
+    dst_ip = [[0x0A, 0x01, 0x01 + i, 0x02] for i in range(10)]
     src_ip6 = [
         [
-            0xab, 0xcd + i, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1a
+            0xAB,
+            0xCD + i,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x1A,
         ]
         for i in range(10)
     ]
     dst_ip6 = [
         [
-            0xab, 0xcd + i, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2a
+            0xAB,
+            0xCD + i,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            0x2A,
         ]
         for i in range(10)
     ]
     src_port = [[0x13, 0x88 + i] for i in range(10)]
-    dst_port = [[0x07, 0xd0 + i] for i in range(10)]
+    dst_port = [[0x07, 0xD0 + i] for i in range(10)]
 
     cap_dict = utils.get_all_captures(api, cfg)
     assert len(cap_dict) == 1
-    size_dt = {
-        size: [0 for i in range(10)]
-    }
+    size_dt = {size: [0 for i in range(10)]}
 
     for index, b in enumerate(cap_dict[list(cap_dict.keys())[0]]):
         try:

@@ -11,7 +11,9 @@ def test_basic_flow_stats(settings):
     - frames transmitted and received for configured flow is as expected
     """
     # host, port locations and ext is fetched from settings.json
-    api = snappi.api(location=settings.location, ext=settings.ext)
+    api = snappi.api(
+        location=settings.location, ext=settings.ext, verify=False
+    )
 
     config = api.config()
     tx, rx = config.ports.port(name="tx", location=settings.ports[0]).port(
