@@ -1,4 +1,5 @@
 import snappi
+from snappi.snappi import Flow
 
 
 def hello_snappi():
@@ -30,7 +31,10 @@ def hello_snappi():
     cp.port_names = [p1.name, p2.name]
 
     # add two traffic flows
-    f1, f2 = cfg.flows.flow(name="flow p1->p2").flow(name="flow p2->p1")
+    f1 = cfg.flows.add(name="flow p1->p2")
+    f2 = Flow(name="flow p2->p1")
+    cfg.flows.append(f2)
+
     # and assign source and destination ports for each
     f1.tx_rx.port.tx_name, f1.tx_rx.port.rx_name = p1.name, p2.name
     f2.tx_rx.port.tx_name, f2.tx_rx.port.rx_name = p2.name, p1.name
@@ -86,6 +90,58 @@ def hello_snappi():
     assert wait_for(lambda: metrics_ok(api, cfg)), "Metrics validation failed!"
 
     assert captures_ok(api, cfg), "Capture validation failed!"
+
+    # remove 1 port
+    cfg.ports.remove(1)
+
+    expected_errors = [
+        'Rx port "p2" in flow "flow p1->p2" is not part of the configured ports',
+        'Tx port "p2" in flow "flow p2->p1" is not part of the configured ports',
+        'The port "p2" of the Capture "cp" is not a part of the configured ports',
+        'The port "p2" of the layer1 "ly" is not a part of the configured ports',
+    ]
+
+    found_err = False
+
+    try:
+        print("Pushing new traffic configuration ...")
+        api.set_config(cfg)
+    except Exception as e:
+        found_err = True
+        error_code = e.args[0]
+        errors = e.args[1]["errors"]
+        assert error_code == 400, str(error_code)
+        assert len(errors) != 0, str(errors)
+        assert errors == expected_errors, str(expected_errors)
+    assert found_err, "Exception is not raised"
+
+    # remove all ports
+    cfg.ports.clear()
+
+    expected_errors = [
+        'Tx port "p1" in flow "flow p1->p2" is not part of the configured ports',
+        'Rx port "p2" in flow "flow p1->p2" is not part of the configured ports',
+        'Tx port "p2" in flow "flow p2->p1" is not part of the configured ports',
+        'Rx port "p1" in flow "flow p2->p1" is not part of the configured ports',
+        'The port "p1" of the Capture "cp" is not a part of the configured ports',
+        'The port "p2" of the Capture "cp" is not a part of the configured ports',
+        'The port "p1" of the layer1 "ly" is not a part of the configured ports',
+        'The port "p2" of the layer1 "ly" is not a part of the configured ports',
+    ]
+
+    found_err = False
+
+    try:
+        print("Pushing new traffic configuration ...")
+        api.set_config(cfg)
+    except Exception as e:
+        found_err = True
+        error_code = e.args[0]
+        errors = e.args[1]["errors"]
+        assert error_code == 400, str(error_code)
+        assert len(errors) != 0, str(errors)
+        assert errors == expected_errors, str(expected_errors)
+    assert found_err, "Exception is not raised"
 
     print("Test passed !")
 
