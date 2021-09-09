@@ -26,10 +26,6 @@ def test_udp_header_with_counter(api, b2b_raw_config, utils):
     udp.dst_port.decrement.start = 6000
     udp.dst_port.decrement.step = 2
     udp.dst_port.decrement.count = 10
-    udp.length.increment.start = 35
-    udp.length.increment.step = 1
-    udp.length.increment.count = 3
-    udp.checksum.GOOD
     flow.duration.fixed_packets.packets = packets
     flow.size.fixed = size
     flow.rate.percentage = 10
@@ -61,7 +57,6 @@ def captures_ok(api, cfg, size, utils):
     """
     src = [src_port for src_port in range(5000, 5020, 2)]
     dst = [dst_port for dst_port in range(6000, 5980, -2)]
-    length = 36
     cap_dict = utils.get_all_captures(api, cfg)
     assert len(cap_dict) == 1
 
@@ -71,8 +66,6 @@ def captures_ok(api, cfg, size, utils):
         for packet in cap_dict[k]:
             assert utils.to_hex(packet[34:36]) == hex(src[i])
             assert utils.to_hex(packet[36:38]) == hex(dst[i])
-            # Length field value can't be assigned manually. 
-            assert utils.to_hex(packet[38:40]) == hex(length)
             assert len(packet) == size
             i = (i + 1) % 10
             j = (j + 1) % 2
