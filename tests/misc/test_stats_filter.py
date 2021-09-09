@@ -1,6 +1,10 @@
 import time
+import pytest
 
 
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/442"
+)
 def test_stats_filter_e2e(api, b2b_raw_config, utils):
     """
     configure two flows f1 and f2
