@@ -1,3 +1,9 @@
+import pytest
+
+
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/441"
+)
 def test_ip_device_and_flow(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.
