@@ -11,7 +11,7 @@ def hello_snappi():
     - Validate that captured UDP packets on both the ports are as expected.
     """
     # create a new API instance where location points to controller
-    api = snappi.api(location="https://localhost")
+    api = snappi.api(location="https://localhost", verify=False)
     # and an empty traffic configuration to be pushed to controller later on
     cfg = api.config()
 
