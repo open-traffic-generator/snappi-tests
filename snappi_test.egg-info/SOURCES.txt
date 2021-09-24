@@ -1,0 +1,7 @@
+license
+pyproject.toml
+setup.py
+snappi_test.egg-info/PKG-INFO
+snappi_test.egg-info/SOURCES.txt
+snappi_test.egg-info/dependency_links.txt
+snappi_test.egg-info/top_level.txt

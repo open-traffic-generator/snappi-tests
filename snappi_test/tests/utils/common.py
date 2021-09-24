@@ -68,11 +68,11 @@ class Settings(object):
         # these not be defined and are here only for documentation
         self.username = None
         self.location = None
-        self.ports = None
-        self.speed = None
+        self.ports = []
+        self.speed = "speed_1_gbps"
         self.media = None
-        self.timeout_seconds = None
-        self.interval_seconds = None
+        self.timeout_seconds = 30
+        self.interval_seconds = 0.5
         self.log_level = None
         self.dynamic_stats_output = None
         self.license_servers = None
@@ -178,7 +178,12 @@ def timed_out(start_seconds, timeout):
     return seconds_elapsed(start_seconds) > timeout
 
 
-def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
+def wait_for(
+    func,
+    condition_str,
+    interval_seconds=settings.interval_seconds,
+    timeout_seconds=settings.timeout_seconds,
+):
     """
     Keeps calling the `func` until it returns true or `timeout_seconds` occurs
     every `interval_seconds`. `condition_str` should be a constant string
@@ -196,10 +201,6 @@ def wait_for(func, condition_str, interval_seconds=None, timeout_seconds=None):
         poll_until(condition_satisfied, condition_str, **kwargs)
     ```
     """
-    if interval_seconds is None:
-        interval_seconds = settings.interval_seconds
-    if timeout_seconds is None:
-        timeout_seconds = settings.timeout_seconds
     start_seconds = int(time.time())
 
     print("\n\nWaiting for %s ..." % condition_str)
