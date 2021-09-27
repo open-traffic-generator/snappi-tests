@@ -49,21 +49,24 @@ def test():
         "tests",
         '-m "not dut and not l1_manual"',
     ]
+    py_exe = os.path.join(os.getcwd(), py())
+    os.chdir("snappi_test")
     run(
         [
-            py() + " -m pytest -svvv {}".format(" ".join(args)),
+            py_exe + " -m pytest -svvv {}".format(" ".join(args)),
         ]
     )
+    os.chdir("..")
 
 
 def dist():
     clean()
     run(
         [
-            py() + " setup.py sdist bdist_wheel --universal",
+            py() + " -m pip install --upgrade -e .[dev]",
         ]
     )
-    print(os.listdir("dist"))
+    # print(os.listdir("dist"))
 
 
 def install():
@@ -176,7 +179,10 @@ def py():
     try:
         return py.path
     except AttributeError:
-        py.path = os.path.join(".env", "bin", "python")
+        if sys.platform != "win32":
+            py.path = os.path.join(".env", "bin", "python")
+        else:
+            py.path = os.path.join(".env", "Scripts", "python.exe")
         if not os.path.exists(py.path):
             py.path = sys.executable
 
@@ -193,9 +199,9 @@ def run(commands):
     try:
         for cmd in commands:
             print(cmd)
-            subprocess.check_call(
-                cmd.encode("utf-8", errors="ignore"), shell=True
-            )
+            if sys.platform != "win32":
+                cmd = cmd.encode("utf-8", errors="ignore")
+            subprocess.check_call(cmd, shell=True)
     except Exception:
         sys.exit(1)
 

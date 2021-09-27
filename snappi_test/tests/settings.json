@@ -1,13 +1,13 @@
 {
     "username": "common",
-    "location": "https://localhost",
+    "location": "https://10.39.71.203:443",
     "ports": [
         "localhost:5555",
         "localhost:5556"
     ],
     "ext": null,
     "speed": "speed_1_gbps",
-    "media": null,
+    "media": "fiber",
     "timeout_seconds": 30,
     "interval_seconds": 0.5,
     "log_level": "info",
