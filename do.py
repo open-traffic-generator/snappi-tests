@@ -49,7 +49,7 @@ def test():
         "tests",
         '-m "not dut and not l1_manual"',
     ]
-    py_exe = py()
+    py_exe = os.path.join(os.getcwd(), py())
     os.chdir("snappi_test")
     run(
         [
