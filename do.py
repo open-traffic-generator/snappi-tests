@@ -63,10 +63,10 @@ def dist():
     clean()
     run(
         [
-            py() + " setup.py sdist bdist_wheel --universal",
+            py() + " -m pip install --upgrade -e .[dev]",
         ]
     )
-    print(os.listdir("dist"))
+    # print(os.listdir("dist"))
 
 
 def install():
@@ -179,7 +179,10 @@ def py():
     try:
         return py.path
     except AttributeError:
-        py.path = os.path.join(".env", "bin", "python")
+        if sys.platform != "win32":
+            py.path = os.path.join(".env", "bin", "python")
+        else:
+            py.path = os.path.join(".env", "Scripts", "python.exe")
         if not os.path.exists(py.path):
             py.path = sys.executable
 

@@ -20,6 +20,7 @@ jobs:
           rm -rf .env
           ${{matrix.python-version}} do.py setup
           ${{matrix.python-version}} do.py init
+          ${{matrix.python-version}} do.py dist
       - name: Run tests
         run: |
           ${{matrix.python-version}} do.py test
