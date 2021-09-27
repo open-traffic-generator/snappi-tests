@@ -12,15 +12,22 @@ def udp_bidirectional_flow():
     - Validate that captured UDP packets on both the ports are as expected.
     """
     # create a new API instance where location points to controller
-    # location = "https://<tgenip>:<443(or)11009(or)port_set_by_user>"
-    # ext = ixnetwork (or) none for Athena
+    # ixia-c:
+    #   location = "https://<tgen-ip>:<port>"
+    # ixnetwork
+    #   location = "https://<tgen-ip>:<port>", ext="ixnetwork"
+    # trex
+    #   location = "https://<tgen-ip>:<port>", ext="trex"
     api = snappi.api(location="https://localhost:443", verify=False, ext=None)
     # and an empty traffic configuration to be pushed to controller later on
     cfg = api.config()
 
     # add two ports where location points to traffic-engine (aka ports)
-    # port.location = [athena] localhost:5555 or [ixnetwork] \
-    # <chassisip>;card;port
+    # ixia-c, trex:
+    #   port.location = "localhost:5555"
+    # ixnetwork:
+    #   port.location = "<chassisip>;card;port"
+    #
     p1, p2 = cfg.ports.port(name="p1", location="localhost:5555").port(
         name="p2", location="localhost:5556"
     )
@@ -61,6 +68,7 @@ def udp_bidirectional_flow():
     # set source and destination IPv4 addresses
     ip1.src.value, ip1.dst.value = "10.0.0.1", "10.0.0.2"
     ip2.src.value, ip2.dst.value = "10.0.0.2", "10.0.0.1"
+    # TODO models is defaulting to any host with 64 and need to fix.
     ip1.protocol.value = 17
     ip2.protocol.value = 17
 
