@@ -49,10 +49,11 @@ def test():
         "tests",
         '-m "not dut and not l1_manual"',
     ]
+    py_exe = py()
     os.chdir("snappi_test")
     run(
         [
-            py() + " -m pytest -svvv {}".format(" ".join(args)),
+            py_exe + " -m pytest -svvv {}".format(" ".join(args)),
         ]
     )
     os.chdir("..")
