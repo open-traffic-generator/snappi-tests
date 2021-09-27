@@ -49,11 +49,13 @@ def test():
         "tests",
         '-m "not dut and not l1_manual"',
     ]
+    os.chdir("snappi_test")
     run(
         [
             py() + " -m pytest -svvv {}".format(" ".join(args)),
         ]
     )
+    os.chdir("..")
 
 
 def dist():
@@ -193,9 +195,9 @@ def run(commands):
     try:
         for cmd in commands:
             print(cmd)
-            subprocess.check_call(
-                cmd.encode("utf-8", errors="ignore"), shell=True
-            )
+            if sys.platform != "win32":
+                cmd = cmd.encode("utf-8", errors="ignore")
+            subprocess.check_call(cmd, shell=True)
     except Exception:
         sys.exit(1)
 

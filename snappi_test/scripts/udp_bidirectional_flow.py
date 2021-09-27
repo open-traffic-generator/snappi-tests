@@ -2,7 +2,7 @@ import snappi
 from snappi_test.tests import utils
 
 
-def hello_snappi():
+def udp_bidirectional_flow():
     """
     This script does following:
     - Send 1000 packets back and forth between the two ports at a rate of
@@ -12,6 +12,8 @@ def hello_snappi():
     - Validate that captured UDP packets on both the ports are as expected.
     """
     # create a new API instance where location points to controller
+    # location = "https://<tgenip>:<443(or)11009(or)port_set_by_user>"
+    # ext = ixnetwork (or) none for Athena
     api = snappi.api(
         location=utils.settings.location, verify=False, ext=utils.settings.ext
     )
@@ -19,6 +21,8 @@ def hello_snappi():
     cfg = api.config()
 
     # add two ports where location points to traffic-engine (aka ports)
+    # port.location = [athena] localhost:5555 or [ixnetwork] \
+    # <chassisip>;card;port
     p1, p2 = cfg.ports.port(name="p1", location=utils.settings.ports[0]).port(
         name="p2", location=utils.settings.ports[1]
     )
@@ -92,8 +96,6 @@ def hello_snappi():
     print("Expected\tTotal Tx\tTotal Rx")
     assert wait_for(lambda: metrics_ok(api, cfg)), "Metrics validation failed!"
 
-    assert captures_ok(api, cfg), "Capture validation failed!"
-
     print("Test passed !")
 
 
@@ -116,32 +118,6 @@ def metrics_ok(api, cfg):
     return expected == total_tx and total_rx >= expected
 
 
-def captures_ok(api, cfg):
-    import dpkt
-
-    print("Checking captured packets on all configured ports ...")
-    print("Port Name\tExpected\tUDP packets")
-
-    result = []
-    for p in cfg.ports:
-        exp, act = 1000, 0
-        # create capture request and filter based on port name
-        req = api.capture_request()
-        req.port_name = p.name
-        # fetch captured pcap bytes and feed it to pcap parser dpkt
-        pcap = dpkt.pcap.Reader(api.get_capture(req))
-        for _, buf in pcap:
-            # check if current packet is a valid UDP packet
-            eth = dpkt.ethernet.Ethernet(buf)
-            if isinstance(eth.data.data, dpkt.udp.UDP):
-                act += 1
-
-        print("%s\t\t%d\t\t%d" % (p.name, exp, act))
-        result.append(exp == act)
-
-    return all(result)
-
-
 def wait_for(func, timeout=10, interval=0.2):
     """
     Keeps calling the `func` until it returns true or `timeout` occurs
@@ -161,4 +137,4 @@ def wait_for(func, timeout=10, interval=0.2):
 
 
 if __name__ == "__main__":
-    hello_snappi()
+    udp_bidirectional_flow()
