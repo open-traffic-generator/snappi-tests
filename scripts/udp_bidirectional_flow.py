@@ -1,5 +1,4 @@
 import snappi
-from snappi_test.tests import utils
 
 
 def udp_bidirectional_flow():
