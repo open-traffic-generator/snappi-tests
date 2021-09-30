@@ -3,7 +3,7 @@
 // - mkdir -p scratch && cd scratch
 // - curl -kLO https://raw.githubusercontent.com/open-traffic-generator/snappi-tests/main/scripts/packet_forward.go
 // - go mod init example/test
-// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.5.6
+// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.6.1
 // - go run packet_forward.go
 // Open any new issues (or search for existing) at:
 // - https://github.com/open-traffic-generator/openapiart/issues (specific to code generation)
