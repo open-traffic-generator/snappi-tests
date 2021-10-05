@@ -3,7 +3,7 @@
 // - mkdir -p scratch && cd scratch
 // - curl -kLO https://raw.githubusercontent.com/open-traffic-generator/snappi-tests/main/scripts/packet_forward.go
 // - go mod init example/test
-// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.6.1
+// - go get github.com/open-traffic-generator/snappi/gosnappi@v0.6.3
 // - go run packet_forward.go
 // Open any new issues (or search for existing) at:
 // - https://github.com/open-traffic-generator/openapiart/issues (specific to code generation)
@@ -23,15 +23,18 @@ func main() {
 	api := gosnappi.NewApi()
 	if httpTransport := false; httpTransport {
 		log.Println("Using HTTP transport ...")
-		api.NewHttpTransport().SetLocation("https://localhost:443")
+		api.NewHttpTransport().SetLocation("https://ixia-c-service:443")
 	} else {
 		log.Println("Using gRPC transport ...")
-		api.NewGrpcTransport().SetLocation("localhost:40051")
+		api.NewGrpcTransport().SetLocation("grpc-service.ixia-c:40051")
 	}
 
 	log.Println("Setting config ...")
 	config := PacketForwardConfig(api)
 	warn, err := api.SetConfig(config)
+	LogWarnErr(warn, err)
+
+	warn, err = api.SetProtocolState(api.NewProtocolState().SetState(gosnappi.ProtocolStateState.START))
 	LogWarnErr(warn, err)
 
 	err = WaitFor(func() (bool, error) {
@@ -86,9 +89,9 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	p3 := config.Ports().Add().SetName("p3").SetLocation("service-ixia-c-port3.ixia-c:5555+service-ixia-c-port3.ixia-c:50071")
 
 	// add devices
-	d1 := config.Devices().Add().SetName("d1").SetContainerName(p1.Name())
-	d2 := config.Devices().Add().SetName("d2").SetContainerName(p2.Name())
-	d3 := config.Devices().Add().SetName("d3").SetContainerName(p3.Name())
+	d1 := config.Devices().Add().SetName("d1")
+	d2 := config.Devices().Add().SetName("d2")
+	d3 := config.Devices().Add().SetName("d3")
 
 	// add flows and common properties
 	for i := 1; i <= 4; i++ {
@@ -99,27 +102,29 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	}
 
 	// add protocol stacks for device d1
-	d1Eth := d1.Ethernet().
+	d1Eth := d1.Ethernets().Add().
 		SetName("d1Eth").
+		SetPortName(p1.Name()).
 		SetMac("00:00:01:01:01:01").
 		SetMtu(1500)
 
-	d1Ip := d1Eth.Ipv4().
+	d1Ip := d1Eth.Ipv4Addresses().Add().
 		SetName("d1Ip").
 		SetAddress("1.1.1.1").
 		SetGateway("1.1.1.2").
 		SetPrefix(24)
 
-	d1Bgp := d1Ip.Bgpv4().
+	d1Bgp := d1.Bgp().SetRouterId("1.1.1.1")
+	d1BgpIfc := d1Bgp.Ipv4Interfaces().Add().SetIpv4Name(d1Ip.Name())
+	d1BgpPeer := d1BgpIfc.Peers().Add().
 		SetName("d1Bgp").
-		SetDutAddress("1.1.1.2").
-		SetRouterId("1.1.1.1").
+		SetPeerAddress("1.1.1.2").
 		SetAsNumber(1111).
-		SetAsType(gosnappi.DeviceBgpv4AsType.EBGP)
+		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
 
-	d1BgpRoute := d1Bgp.Bgpv4Routes().Add().
+	d1BgpRoute := d1BgpPeer.V4Routes().Add().
 		SetName("d1BgpRoute").
-		SetNextHopAddress("1.1.1.1")
+		SetNextHopIpv4Address("1.1.1.1")
 
 	d1BgpRoute.Addresses().Add().
 		SetAddress("10.10.10.0").
@@ -130,42 +135,43 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	d1BgpRoute.Communities().Add().
 		SetAsNumber(1).
 		SetAsCustom(2).
-		SetCommunityType(gosnappi.DeviceBgpCommunityCommunityType.MANUAL_AS_NUMBER)
+		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
 
 	d1BgpRoute.AsPath().
-		SetOverridePeerAsSetMode(true).
-		SetAsSetMode(gosnappi.DeviceBgpAsPathAsSetMode.INCLUDE_AS_SET)
+		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
 
-	d1BgpRoute.AsPath().AsPathSegments().Add().
-		SetAsNumbers([]int32{1112, 1113}).
-		SetSegmentType(gosnappi.DeviceBgpAsPathSegmentSegmentType.AS_SEQ)
+	d1BgpRoute.AsPath().Segments().Add().
+		SetAsNumbers([]int64{1112, 1113}).
+		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
 
 	d1BgpRoute.Advanced().
 		SetMultiExitDiscriminator(50).
-		SetOrigin(gosnappi.DeviceBgpRouteAdvancedOrigin.EGP)
+		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
 
 	// add protocol stacks for device d2
-	d2Eth := d2.Ethernet().
+	d2Eth := d2.Ethernets().Add().
 		SetName("d2Eth").
+		SetPortName(p2.Name()).
 		SetMac("00:00:02:02:02:02").
 		SetMtu(1500)
 
-	d2Ip := d2Eth.Ipv4().
+	d2Ip := d2Eth.Ipv4Addresses().Add().
 		SetName("d2Ip").
 		SetAddress("2.2.2.2").
 		SetGateway("2.2.2.1").
 		SetPrefix(24)
 
-	d2Bgp := d2Ip.Bgpv4().
+	d2Bgp := d2.Bgp().SetRouterId("2.2.2.2")
+	d2BgpIfc := d2Bgp.Ipv4Interfaces().Add().SetIpv4Name(d2Ip.Name())
+	d2BgpPeer := d2BgpIfc.Peers().Add().
 		SetName("d2Bgp").
-		SetDutAddress("2.2.2.1").
-		SetRouterId("2.2.2.2").
+		SetPeerAddress("2.2.2.1").
 		SetAsNumber(2222).
-		SetAsType(gosnappi.DeviceBgpv4AsType.EBGP)
+		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
 
-	d2BgpRoute := d2Bgp.Bgpv4Routes().Add().
+	d2BgpRoute := d2BgpPeer.V4Routes().Add().
 		SetName("d2BgpRoute").
-		SetNextHopAddress("2.2.2.2")
+		SetNextHopIpv4Address("2.2.2.2")
 
 	d2BgpRoute.Addresses().Add().
 		SetAddress("20.20.20.0").
@@ -176,42 +182,43 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	d2BgpRoute.Communities().Add().
 		SetAsNumber(100).
 		SetAsCustom(2).
-		SetCommunityType(gosnappi.DeviceBgpCommunityCommunityType.MANUAL_AS_NUMBER)
+		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
 
 	d2BgpRoute.AsPath().
-		SetOverridePeerAsSetMode(true).
-		SetAsSetMode(gosnappi.DeviceBgpAsPathAsSetMode.INCLUDE_AS_SET)
+		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
 
-	d2BgpRoute.AsPath().AsPathSegments().Add().
-		SetAsNumbers([]int32{2223, 2224, 2225}).
-		SetSegmentType(gosnappi.DeviceBgpAsPathSegmentSegmentType.AS_SEQ)
+	d2BgpRoute.AsPath().Segments().Add().
+		SetAsNumbers([]int64{2223, 2224, 2225}).
+		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
 
 	d2BgpRoute.Advanced().
 		SetMultiExitDiscriminator(40).
-		SetOrigin(gosnappi.DeviceBgpRouteAdvancedOrigin.EGP)
+		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
 
 	// add protocol stacks for device d3
-	d3Eth := d3.Ethernet().
+	d3Eth := d3.Ethernets().Add().
 		SetName("d3Eth").
+		SetPortName(p3.Name()).
 		SetMac("00:00:03:03:03:02").
 		SetMtu(1500)
 
-	d3Ip := d3Eth.Ipv4().
+	d3Ip := d3Eth.Ipv4Addresses().Add().
 		SetName("d3Ip").
 		SetAddress("3.3.3.2").
 		SetGateway("3.3.3.1").
 		SetPrefix(24)
 
-	d3Bgp := d3Ip.Bgpv4().
+	d3Bgp := d3.Bgp().SetRouterId("3.3.3.2")
+	d3BgpIfc := d3Bgp.Ipv4Interfaces().Add().SetIpv4Name(d3Ip.Name())
+	d3BgpPeer := d3BgpIfc.Peers().Add().
 		SetName("d3Bgp").
-		SetDutAddress("3.3.3.1").
-		SetRouterId("3.3.3.2").
+		SetPeerAddress("3.3.3.1").
 		SetAsNumber(3332).
-		SetAsType(gosnappi.DeviceBgpv4AsType.EBGP)
+		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
 
-	d3BgpRoute := d3Bgp.Bgpv4Routes().Add().
+	d3BgpRoute := d3BgpPeer.V4Routes().Add().
 		SetName("d3BgpRoute").
-		SetNextHopAddress("3.3.3.2")
+		SetNextHopIpv4Address("3.3.3.2")
 
 	d3BgpRoute.Addresses().Add().
 		SetAddress("30.30.30.0").
@@ -222,19 +229,18 @@ func PacketForwardConfig(api gosnappi.GosnappiApi) gosnappi.Config {
 	d3BgpRoute.Communities().Add().
 		SetAsNumber(1).
 		SetAsCustom(2).
-		SetCommunityType(gosnappi.DeviceBgpCommunityCommunityType.MANUAL_AS_NUMBER)
+		SetType(gosnappi.BgpCommunityType.MANUAL_AS_NUMBER)
 
 	d3BgpRoute.AsPath().
-		SetOverridePeerAsSetMode(true).
-		SetAsSetMode(gosnappi.DeviceBgpAsPathAsSetMode.INCLUDE_AS_SET)
+		SetAsSetMode(gosnappi.BgpAsPathAsSetMode.INCLUDE_AS_SET)
 
-	d3BgpRoute.AsPath().AsPathSegments().Add().
-		SetAsNumbers([]int32{3333, 3334}).
-		SetSegmentType(gosnappi.DeviceBgpAsPathSegmentSegmentType.AS_SEQ)
+	d3BgpRoute.AsPath().Segments().Add().
+		SetAsNumbers([]int64{3333, 3334}).
+		SetType(gosnappi.BgpAsPathSegmentType.AS_SEQ)
 
 	d3BgpRoute.Advanced().
 		SetMultiExitDiscriminator(33).
-		SetOrigin(gosnappi.DeviceBgpRouteAdvancedOrigin.EGP)
+		SetOrigin(gosnappi.BgpRouteAdvancedOrigin.EGP)
 
 	// add endpoints and packet description flow 1
 	f1 := config.Flows().Items()[0]
