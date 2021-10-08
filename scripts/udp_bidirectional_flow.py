@@ -16,16 +16,17 @@ def udp_bidirectional_flow():
     # ixnetwork
     #   location = "https://<tgen-ip>:<port>", ext="ixnetwork"
     # trex
-    #   location = "https://<tgen-ip>:<port>", ext="trex"
+    #   location = "<tgen-ip>:<port>", ext="trex"
     api = snappi.api(location="https://localhost:443", verify=False, ext=None)
     # and an empty traffic configuration to be pushed to controller later on
     cfg = api.config()
 
     # add two ports where location points to traffic-engine (aka ports)
-    # ixia-c, trex:
+    # ixia-c, trex (Note: port.location is not mandatory for TRex):
     #   port.location = "localhost:5555"
     # ixnetwork:
     #   port.location = "<chassisip>;card;port"
+    #
     #
     p1, p2 = cfg.ports.port(name="p1", location="localhost:5555").port(
         name="p2", location="localhost:5556"
