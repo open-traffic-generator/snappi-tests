@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   cicd:
-    runs-on: [self-hosted, Linux, Centos, x64]
+    runs-on: [self-hosted, Linux, x64]
     strategy:
       max-parallel: 1
       matrix:
