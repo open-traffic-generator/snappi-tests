@@ -1,9 +1,3 @@
-import pytest
-
-
-@pytest.mark.skip(
-    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/441"
-)
 def test_ip_one_to_one(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.
@@ -48,17 +42,17 @@ def test_ip_one_to_one(api, b2b_raw_config, utils):
         dev = b2b_raw_config.devices.device()[-1]
 
         dev.name = "%s_dev_%d" % (node, i + 1)
-        dev.container_name = b2b_raw_config.ports[port].name
 
-        dev.ethernet.name = "%s_eth_%d" % (node, i + 1)
-        dev.ethernet.mac = addrs["mac_%s" % node][i]
+        eth = dev.ethernets.add()
+        eth.name = "%s_eth_%d" % (node, i + 1)
+        eth.port_name = b2b_raw_config.ports[port].name
+        eth.mac = addrs["mac_%s" % node][i]
 
-        dev.ethernet.ipv4.name = "%s_ipv4_%d" % (node, i + 1)
-        dev.ethernet.ipv4.address = addrs["ip_%s" % node][i]
-        dev.ethernet.ipv4.gateway = addrs[
-            "ip_%s" % ("rx" if node == "tx" else "tx")
-        ][i]
-        dev.ethernet.ipv4.prefix = 24
+        ip = eth.ipv4_addresses.add()
+        ip.name = "%s_ipv4_%d" % (node, i + 1)
+        ip.address = addrs["ip_%s" % node][i]
+        ip.gateway = addrs["ip_%s" % ("rx" if node == "tx" else "tx")][i]
+
     b2b_raw_config.flows.clear()
     f1, f2 = b2b_raw_config.flows.flow(name="TxFlow-1").flow(name="TxFlow-2")
     f1.tx_rx.device.tx_names = [
