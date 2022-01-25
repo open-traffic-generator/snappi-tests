@@ -1,4 +1,10 @@
-# Snappi Tests
+# snappi Tests
+
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://en.wikipedia.org/wiki/MIT_License)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/open-traffic-generator/snappi-tests/cicd)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/open-traffic-generator/snappi-tests.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/open-traffic-generator/snappi-tests/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/open-traffic-generator/snappi-tests.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/open-traffic-generator/snappi-tests/context:python)
 
 This repository consists of end-to-end test scripts written in [snappi](https://github.com/open-traffic-generator/snappi).
 
