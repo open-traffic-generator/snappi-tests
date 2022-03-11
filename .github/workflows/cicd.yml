@@ -3,8 +3,7 @@ name: cicd
 on:
   push:
     branches: [main]
-  #workflow_call:
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   cicd:
