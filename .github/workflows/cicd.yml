@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_call:
+  repository_dispatch:
+    types: [sample_push]
 
 jobs:
   cicd:
