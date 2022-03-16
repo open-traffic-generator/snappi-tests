@@ -3,6 +3,8 @@ name: cicd
 on:
   push:
     branches: [main]
+  repository_dispatch:
+    types: [cicd]
   workflow_call:
 
 jobs:
