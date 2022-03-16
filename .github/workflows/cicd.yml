@@ -23,9 +23,9 @@ jobs:
           rm -rf .env
           ${{matrix.python-version}} do.py setup
           ${{matrix.python-version}} do.py init
-      #- name: Run tests
-      #  run: |
-      #    ${{matrix.python-version}} do.py test
+      - name: Run tests
+        run: |
+          ${{matrix.python-version}} do.py test
       - name: Get package version
         id: get_version
         run: |
