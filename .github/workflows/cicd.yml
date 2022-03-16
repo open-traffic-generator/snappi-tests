@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
   repository_dispatch:
-    types: [cicd]
+    types: [cicd_snappitest]
   workflow_call:
 
 jobs:
-  cicd:
+  cicd_snappitest:
     runs-on: [self-hosted, Linux, x64]
     strategy:
       max-parallel: 1
