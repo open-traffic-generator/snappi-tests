@@ -18,7 +18,9 @@ jobs:
     steps:
       - name: checking the action
         run: |
-          echo "event name is:" ${{ github.event_name }}"
+          echo "event name is: ${{ github.event_name }}"
+          echo "ref ${{ github.head_ref }}"
+          echo "another ref ${{ env.BASE_BRANCH }}"
       #- name: Checkout source
       #  uses: actions/checkout@v2
       #  with:
