@@ -23,8 +23,8 @@ jobs:
       #    echo "another ref ${{ env.BASE_BRANCH }}"
       - name: Checkout source
         uses: actions/checkout@v2
-        run: |
-          echo "event name is: ${{ github.event_name }}"
+        #run: |
+        #  echo "event name is: ${{ github.event_name }}"
         #with:
         #  ref: ${{ github.head_ref }}
       #- name: Install dependencies
