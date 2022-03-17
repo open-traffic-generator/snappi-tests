@@ -1,16 +1,11 @@
 name: cicd
 
-#on:
-#  push:
-#    branches: [main]
-#  #repository_dispatch:
-#  #  types: [cicd]
-#  workflow_call:
-#
-
 on:
-  repository_dispatch:
-    types: [my-event]
+  push:
+    branches: [main]
+  #repository_dispatch:
+  #  types: [cicd]
+  workflow_call:
 
 jobs:
   cicd:
@@ -22,10 +17,10 @@ jobs:
 
     steps:
       - name: checking the action
-        with:
-          ref: ${{ github.event.client_payload.ref }}
-      - run: echo ${{ github.event.client_payload.sha }}
-      #- run: echo ${{ github.event.client_payload.test }}
+        run: |
+          echo "event name is: ${{ github.event_name }}"
+          echo "ref ${{ github.head_ref }}"
+          echo "another ref ${{ env.BASE_BRANCH }}"
       #- name: Checkout source
       #  uses: actions/checkout@v2
       #  with:
