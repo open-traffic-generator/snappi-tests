@@ -2,8 +2,8 @@ name: cicd
 
 on:
   push:
-    #branches: [main]
-
+    branches: [main]
+  release:
   #repository_dispatch:
   #  types: [cicd]
   #workflow_call:
