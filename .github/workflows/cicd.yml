@@ -2,7 +2,7 @@ name: cicd
 
 on:
   push:
-    branches: [Issue495-CI/CD]
+    #branches: [Issue495-CI/CD]
   #repository_dispatch:
   #  types: [RepoAevent]
   #repository_dispatch:
