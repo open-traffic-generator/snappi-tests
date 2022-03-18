@@ -2,9 +2,9 @@ name: cicd
 
 on:
   push:
-    branches: [main]
-  repository_dispatch:
-    types: [RepoAevent]
+    branches: [Issue495-CI/CD]
+  #repository_dispatch:
+  #  types: [RepoAevent]
   #repository_dispatch:
   #  types: [cicd]
   #workflow_call:
