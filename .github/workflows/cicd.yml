@@ -1,8 +1,6 @@
 name: cicd
 
-on:
-  push:
-    #branches: [Issue495-CI/CD]
+on: [push]
 
 jobs:
   cicd:
@@ -27,9 +25,9 @@ jobs:
         with:
           path: |
             dist
-      #- name: Run tests
-      #  run: |
-      #    ${{matrix.python-version}} do.py test
+      - name: Run tests
+        run: |
+          ${{matrix.python-version}} do.py test
       - name: Get package version
         id: get_version
         run: |
