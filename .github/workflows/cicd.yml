@@ -15,33 +15,33 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-      - name: Install dependencies
-        run: |
-          rm -rf .env
-          ${{matrix.python-version}} do.py setup
-          ${{matrix.python-version}} do.py init
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+      #- name: Install dependencies
+      #  run: |
+      #    rm -rf .env
+      #    ${{matrix.python-version}} do.py setup
+      #    ${{matrix.python-version}} do.py init
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
         with:
-          path: |
-            dist
-      - name: Run tests
-        run: |
-          ${{matrix.python-version}} do.py test
-      - name: Get package version
-        id: get_version
-        run: |
-          echo "::set-output name=version::v$(${{matrix.python-version}} do.py version)"
-      - name: Check tag for current version
-        uses: mukunku/tag-exists-action@v1.0.0
-        id: check_tag
-        with:
-          tag: ${{ steps.get_version.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create release and publish artifacts
-        if: steps.check_tag.outputs.exists == 'false' && matrix.python-version == 'python38'
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.get_version.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          url: https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/196437665/zip
+          path: dist
+      #run: |
+      #  ${{matrix.python-version}} do.py test
+      #- name: Get package version
+      #  id: get_version
+      #  run: |
+      #    echo "::set-output name=version::v$(${{matrix.python-version}} do.py version)"
+      #- name: Check tag for current version
+      #  uses: mukunku/tag-exists-action@v1.0.0
+      #  id: check_tag
+      #  with:
+      #    tag: ${{ steps.get_version.outputs.version }}
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: Create release and publish artifacts
+      #  if: steps.check_tag.outputs.exists == 'false' && matrix.python-version == 'python38'
+      #  uses: ncipollo/release-action@v1
+      #  with:
+      #    tag: ${{ steps.get_version.outputs.version }}
+      #    token: ${{ secrets.GITHUB_TOKEN }}
+#
