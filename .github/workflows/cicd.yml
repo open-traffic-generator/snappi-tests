@@ -27,7 +27,7 @@ jobs:
           workflow: cicd.yml
           workflow_conclusion: success
           run_id: 196437665
-          name: artifact_name
+          name: artifact
           repo: https://api.github.com/repos/open-traffic-generator/models
       #uses: actions/download-artifact@v3
       #with:
