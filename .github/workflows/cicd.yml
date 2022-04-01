@@ -20,11 +20,19 @@ jobs:
       #    rm -rf .env
       #    ${{matrix.python-version}} do.py setup
       #    ${{matrix.python-version}} do.py init
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
-          url: https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/196437665/zip
-          path: dist
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: cicd.yml
+          workflow_conclusion: success
+          run_id: 196437665
+          name: artifact_name
+          repo: https://api.github.com/repos/open-traffic-generator/models
+      #uses: actions/download-artifact@v3
+      #with:
+      #  url: https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/196437665/zip
+      #  path: dist
       #run: |
       #  ${{matrix.python-version}} do.py test
       #- name: Get package version
