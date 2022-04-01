@@ -29,6 +29,7 @@ jobs:
           run_id: 196437665
           name: artifact
           repo: https://api.github.com/repos/open-traffic-generator/models
+          check_artifacts: true
       #uses: actions/download-artifact@v3
       #with:
       #  url: https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/196437665/zip
