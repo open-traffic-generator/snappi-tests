@@ -25,8 +25,8 @@ jobs:
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: workflow.yml
-          run_id: 2071282373
-          repo: https://api.github.com/repos/open-traffic-generator/models
+          run_id: 2076646026
+          repo: https://github.com/open-traffic-generator/models
       #uses: actions/download-artifact@v3
       #with:
       #  url: https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/196437665/zip
