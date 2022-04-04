@@ -31,6 +31,7 @@ jobs:
           workflow: 2411682
           repo: open-traffic-generator/models
           workflow_conclusion: success
+          path: dist/
         #env:
         #  WHO_TO_TRUST: ${{ secrets.CI_TOKEN }}
         #if: steps.release_flag.outputs.url != 'true'
