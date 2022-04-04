@@ -26,7 +26,7 @@ jobs:
           ${{matrix.python-version}} do.py setup
           ${{matrix.python-version}} do.py init
       - name: Download artifacts if release is not created on snappi-ixnetwork
-        if: steps.release_flag.outputs.url != True
+        if: steps.release_flag.outputs.url != 'True'
         run: |
           "curl -kLO -H "Authorization: token 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" ${{ steps.release_flag.outputs.url }}"
       #run: |
