@@ -24,6 +24,37 @@ def init():
     )
 
 
+def get_version():
+    if os.path.exists("version.txt"):
+        with open("version.txt") as f:
+            out = f.read()
+            url = re.findall(r"url: \"(.+)\"", out)[0]
+            version_info = re.findall(r"version: \"(.+)\"", out)[0]
+        if version_info is not None:
+            new_data = []
+            with open("requirements.txt") as f:
+                out = f.readlines()
+                for line in out:
+                    match = re.search(
+                        r"snappi/[convergence,ixnetwork/]==.*", line
+                    )
+                    if match:
+                        new_version = (
+                            "snappi/[convergence,ixnetwork/]==" + version_info
+                        )
+                        new_data.append(new_version)
+                    else:
+                        new_data.append(line)
+            f.close()
+            with open("requirements.txt", "w+") as f:
+                f.writelines(new_data)
+            return True
+        else:
+            return url
+    else:
+        return True
+
+
 def lint():
     paths = ["tests", "do.py"]
 
