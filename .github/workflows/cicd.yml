@@ -29,6 +29,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: 2411682
+          repo: open-traffic-generator/models
           workflow_conclusion: success
         #env:
         #  WHO_TO_TRUST: ${{ secrets.CI_TOKEN }}
