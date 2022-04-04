@@ -15,20 +15,21 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-      - name: Check release is created on snappi-ixnetwork
-        id: release_flag
-        run: |
-          echo "::set-output name=url::v$(${{matrix.python-version}} do.py get_version)"
-          echo "${{ steps.release_flag.outputs.url }}"
-      - name: Install dependencies
-        run: |
-          rm -rf .env
-          ${{matrix.python-version}} do.py setup
-          ${{matrix.python-version}} do.py init
+      #- name: Check release is created on snappi-ixnetwork
+      #  id: release_flag
+      #  run: |
+      #    echo "::set-output name=url::v$(${{matrix.python-version}} do.py get_version)"
+      #    echo "${{ steps.release_flag.outputs.url }}"
+      #- name: Install dependencies
+      #  run: |
+      #    rm -rf .env
+      #    ${{matrix.python-version}} do.py setup
+      #    ${{matrix.python-version}} do.py init
       - name: Download artifacts if release is not created on snappi-ixnetwork
-        if: steps.release_flag.outputs.url != 'True'
+        #if: steps.release_flag.outputs.url != 'true'
         run: |
-          "curl -kLO -H "Authorization: token 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" ${{ steps.release_flag.outputs.url }}"
+          curl -H "Authorization: token ${{secrets.CI_TOKEN}}" https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/199399325/zip
+      #"curl -kLO -H "Authorization: token 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" ${{ steps.release_flag.outputs.url }}"
       #run: |
       #  ${{matrix.python-version}} do.py test
       #- name: Get package version
