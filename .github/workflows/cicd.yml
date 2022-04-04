@@ -30,8 +30,8 @@ jobs:
           WHO_TO_TRUST: ${{ secrets.CI_TOKEN }}
         #if: steps.release_flag.outputs.url != 'true'
         run: |
-          echo "${{ env.WHO_TO_TRUST }}"
-          curl -kLO -H "Authorization: token ${{ env.WHO_TO_TRUST }}" https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/199399325/zip
+          curl -kLO -H "Authorization: token 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" https://api.github.com/repos/open-traffic-generator/models/actions/artifacts/199399325/zip
+      #echo "${{ env.WHO_TO_TRUST }}"
       #"curl -kLO -H "Authorization: token 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" ${{ steps.release_flag.outputs.url }}"
       #run: |
       #  ${{matrix.python-version}} do.py test
