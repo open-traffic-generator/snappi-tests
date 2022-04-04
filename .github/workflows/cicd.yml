@@ -19,7 +19,7 @@ jobs:
         id: release_flag
         run: |
           echo "::set-output name=url::v$(${{matrix.python-version}} do.py get_version)"
-          echo "${{ url }}"
+          echo "${{ steps.release_flag.outputs.url }}"
       - name: Install dependencies
         run: |
           rm -rf .env
