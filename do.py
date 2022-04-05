@@ -52,7 +52,7 @@ def get_version():
             f.close()
             with open("requirements.txt", "w+") as f:
                 f.writelines(new_data)
-        else:
+        elif workflow_id:
             print(workflow_id)
         open("version.txt", "w+")
 
