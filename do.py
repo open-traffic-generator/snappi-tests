@@ -40,11 +40,11 @@ def get_version():
                 out = f.readlines()
                 for line in out:
                     match = re.search(
-                        r"snappi/[convergence,ixnetwork/]==.*", line
+                        r"snappi\[convergence,ixnetwork\]==.*", line
                     )
                     if match:
                         new_version = (
-                            "snappi/[convergence,ixnetwork/]==" + version_info
+                            "snappi[convergence,ixnetwork]==" + version_info
                         )
                         new_data.append(new_version)
                     else:
@@ -52,11 +52,11 @@ def get_version():
             f.close()
             with open("requirements.txt", "w+") as f:
                 f.writelines(new_data)
-            return "true"
+            print("true")
         else:
             print(workflow_id)
     else:
-        return "true"
+        print("true")
 
 
 def lint():
