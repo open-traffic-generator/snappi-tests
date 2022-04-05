@@ -25,12 +25,17 @@ def init():
 
 
 def get_version():
+    import pdb; pdb.set_trace()
     if os.path.exists("version.txt"):
         with open("version.txt") as f:
             out = f.read()
-            url = re.findall(r"url: \"(.+)\"", out)[0]
-            version_info = re.findall(r"version: \"(.+)\"", out)[0]
-        if version_info is not None:
+            workflow_id = re.findall(r"workflow_id: (.+)", out)
+            if workflow_id:
+                workflow_id = workflow_id[0]
+            version_info = re.findall(r"version: (.+)", out)
+            if version_info:
+                version_info = version_info[0]
+        if version_info:
             new_data = []
             with open("requirements.txt") as f:
                 out = f.readlines()
@@ -48,11 +53,11 @@ def get_version():
             f.close()
             with open("requirements.txt", "w+") as f:
                 f.writelines(new_data)
-            return True
+            return "true"
         else:
-            return url
+            return workflow_id
     else:
-        return True
+        return "true"
 
 
 def lint():

@@ -15,11 +15,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-      #- name: Check release is created on snappi-ixnetwork
-      #  id: release_flag
-      #  run: |
-      #    echo "::set-output name=url::v$(${{matrix.python-version}} do.py get_version)"
-      #    echo "${{ steps.release_flag.outputs.url }}"
+      - name: Check release is created on snappi-ixnetwork
+        id: release_flag
+        run: |
+          echo "::set-output name=workflow_id::v$(${{matrix.python-version}} do.py get_version)"
+          echo "${{ steps.release_flag.outputs.workflow_id }}"
       #- name: Install dependencies
       #  run: |
       #    rm -rf .env
@@ -28,15 +28,10 @@ jobs:
       - name: Download artifacts if release is not created on snappi-ixnetwork
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: 2411682
+          workflow: ${{ steps.release_flag.outputs.workflow_id }}
           repo: open-traffic-generator/models
           workflow_conclusion: success
           path: ./
-      - name: check the artifact path
-        run: |
-          rm -rf dist
-          ls -lrt
-
         #env:
         #  WHO_TO_TRUST: ${{ secrets.CI_TOKEN }}
         #if: steps.release_flag.outputs.url != 'true'
