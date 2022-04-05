@@ -20,11 +20,11 @@ jobs:
         run: |
           echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
           echo "${{ steps.release_flag.outputs.workflow_id }}"
-      #- name: Install dependencies
-      #  run: |
-      #    rm -rf .env
-      #    ${{matrix.python-version}} do.py setup
-      #    ${{matrix.python-version}} do.py init
+      - name: Install dependencies
+        run: |
+          rm -rf .env
+          ${{matrix.python-version}} do.py setup
+          ${{matrix.python-version}} do.py init
       - name: Download artifacts if release is not created on snappi-ixnetwork
         if: ${{ steps.release_flag.outputs.workflow_id }}
         uses: dawidd6/action-download-artifact@v2
