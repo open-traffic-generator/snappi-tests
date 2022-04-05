@@ -25,7 +25,6 @@ def init():
 
 
 def get_version():
-    import pdb; pdb.set_trace()
     if os.path.exists("version.txt"):
         with open("version.txt") as f:
             out = f.read()
