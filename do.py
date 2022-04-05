@@ -52,11 +52,11 @@ def get_version():
             f.close()
             with open("requirements.txt", "w+") as f:
                 f.writelines(new_data)
-            print("true")
+            print("release")
         else:
             print(workflow_id)
     else:
-        print("true")
+        print("release")
 
 
 def lint():
