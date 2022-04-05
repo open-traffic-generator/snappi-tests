@@ -54,7 +54,7 @@ def get_version():
                 f.writelines(new_data)
             return "true"
         else:
-            return workflow_id
+            print(workflow_id)
     else:
         return "true"
 
