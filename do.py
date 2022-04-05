@@ -54,6 +54,7 @@ def get_version():
                 f.writelines(new_data)
         else:
             print(workflow_id)
+        open("version.txt", "w+")
 
 
 def lint():
