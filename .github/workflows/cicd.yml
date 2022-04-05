@@ -18,7 +18,7 @@ jobs:
       - name: Check release is created on snappi-ixnetwork
         id: release_flag
         run: |
-          echo "::set-output name=workflow_id::v$(${{matrix.python-version}} do.py get_version)"
+          echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
           echo "${{ steps.release_flag.outputs.workflow_id }}"
       #- name: Install dependencies
       #  run: |
