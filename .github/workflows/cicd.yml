@@ -34,6 +34,7 @@ jobs:
           path: ./
       - name: check the artifact path
         run: |
+          rm -rf dist
           ls -lrt
 
         #env:
