@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   cicd:
-    runs-on: [self-hosted, Linux, x64]
+    runs-on: [self-hosted, Linux, x64, uhd]
     strategy:
       max-parallel: 1
       matrix:
@@ -22,7 +22,7 @@ jobs:
           ${{matrix.python-version}} do.py init
       #- name: Run tests
       #  run: |
-      #    ${{matrix.python-version}} do.py test
+      #    ${{matrix.python-version}} do.py uhd_test
       #- name: Get package version
       #  id: get_version
       #  run: |
