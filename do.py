@@ -24,6 +24,39 @@ def init():
     )
 
 
+def get_version():
+    if os.path.exists("version.txt"):
+        with open("version.txt") as f:
+            out = f.read()
+            workflow_id = re.findall(r"workflow_id: (.+)", out)
+            if workflow_id:
+                workflow_id = workflow_id[0]
+            version_info = re.findall(r"version: (.+)", out)
+            if version_info:
+                version_info = version_info[0]
+        if version_info:
+            new_data = []
+            with open("requirements.txt") as f:
+                out = f.readlines()
+                for line in out:
+                    match = re.search(
+                        r"snappi\[convergence,ixnetwork\]==.*", line
+                    )
+                    if match:
+                        new_version = (
+                            "snappi[convergence,ixnetwork]==" + version_info
+                        )
+                        new_data.append(new_version)
+                    else:
+                        new_data.append(line)
+            f.close()
+            with open("requirements.txt", "w+") as f:
+                f.writelines(new_data)
+        elif workflow_id:
+            print(workflow_id)
+        open("version.txt", "w+")
+
+
 def lint():
     paths = ["tests", "do.py"]
 
