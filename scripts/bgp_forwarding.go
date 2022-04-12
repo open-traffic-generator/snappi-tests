@@ -17,6 +17,17 @@ const (
 var (
 	pktCount = 1000
 	routeCount = int32(5)
+	srcMAC = "00:00:01:01:01:01"
+	srcIP = "1.1.1.2"
+	srcGateway = "1.1.1.1"
+	srcPrefix = 24
+	srcAS = 2222
+	dstMAC = "00:00:02:02:02:02"
+	dstIP = "2.2.2.2"
+	dstGateway = "2.2.2.1"
+	dstPrefix = 24
+	dstAS = 3333
+
 )
 
 func main() {
@@ -43,7 +54,12 @@ func main() {
 
 			bgp1m := res.Bgpv4Metrics().Items()[0]
 			bgp2m := res.Bgpv4Metrics().Items()[1]
-			return bgp1m.SessionState() == "up" && bgp2m.SessionState() == "up" && bgp1m.RoutesAdvertised() == routeCount && bgp2m.RoutesAdvertised() == routeCount && bgp1m.RoutesReceived() == routeCount && bgp2m.RoutesReceived() == routeCount
+			return bgp1m.SessionState() == "up" && 
+				bgp2m.SessionState() == "up" && 
+				bgp1m.RoutesAdvertised() == routeCount && 
+				bgp2m.RoutesAdvertised() == routeCount && 
+				bgp1m.RoutesReceived() == routeCount && 
+				bgp2m.RoutesReceived() == routeCount
 		},
 		10*time.Second,
 	)
@@ -100,12 +116,12 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 	p1d1Eth := p1d1.Ethernets().Add().
 		SetName("p1d1eth").
 		SetPortName(p1.Name()).
-		SetMac("00:00:01:01:01:01")
+		SetMac(srcMAC)
 	p1d1IPv4 := p1d1Eth.Ipv4Addresses().Add().
 		SetName("p1d1Ipv4").
-		SetAddress("1.1.1.2").
-		SetGateway("1.1.1.1").
-		SetPrefix(int32(24))
+		SetAddress(srcIP).
+		SetGateway(srcGateway).
+		SetPrefix(int32(srcPrefix))
 
 	p1d1BGP := p1d1.Bgp().
 		SetRouterId(p1d1IPv4.Address())
@@ -114,7 +130,7 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 		Peers().Add().
 		SetName("p1d1BGPv4Peer").
 		SetPeerAddress(p1d1IPv4.Gateway()).
-		SetAsNumber(int32(2222)).
+		SetAsNumber(int32(srcAS)).
 		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
 
 	p1d1BGPv4PeerRoutes := p1d1BGPv4Peer.V4Routes().Add().
@@ -132,12 +148,12 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 	p2d1Eth := p2d1.Ethernets().Add().
 		SetName("p2d1eth").
 		SetPortName(p2.Name()).
-		SetMac("00:00:02:02:02:02")
+		SetMac(dstMAC)
 	p2d1IPv4 := p2d1Eth.Ipv4Addresses().Add().
 		SetName("p2d1Ipv4").
-		SetAddress("2.2.2.2").
-		SetGateway("2.2.2.1").
-		SetPrefix(int32(24))
+		SetAddress(dstIP).
+		SetGateway(dstGateway).
+		SetPrefix(int32(dstPrefix))
 
 	p2d1BGP := p2d1.Bgp().
 		SetRouterId(p2d1IPv4.Address())
@@ -146,7 +162,7 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 		Peers().Add().
 		SetName("p2d1BGPv4Peer").
 		SetPeerAddress(p2d1IPv4.Gateway()).
-		SetAsNumber(int32(3333)).
+		SetAsNumber(int32(dstAS)).
 		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
 
 	p2d1BGPv4PeerRoutes := p2d1BGPv4Peer.V4Routes().Add().
@@ -176,7 +192,7 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 	eth := f1.Packet().Add().Ethernet()
 	ip := f1.Packet().Add().Ipv4()
 
-	eth.Src().SetValue("00:00:01:01:01:01")
+	eth.Src().SetValue(srcMAC)
 
 	ip.Src().SetValue("10.10.10.1")
 	ip.Dst().Increment().SetStart("20.20.20.1").SetStep("0.0.0.1").SetCount(5)
