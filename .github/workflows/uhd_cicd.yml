@@ -20,23 +20,23 @@ jobs:
           rm -rf .env
           ${{matrix.python-version}} do.py setup
           ${{matrix.python-version}} do.py init
-      #- name: Run tests
-      #  run: |
-      #    ${{matrix.python-version}} do.py uhd_test
-      #- name: Get package version
-      #  id: get_version
-      #  run: |
-      #    echo "::set-output name=version::v$(${{matrix.python-version}} do.py version)"
-      #- name: Check tag for current version
-      #  uses: mukunku/tag-exists-action@v1.0.0
-      #  id: check_tag
-      #  with:
-      #    tag: ${{ steps.get_version.outputs.version }}
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #- name: Create release and publish artifacts
-      #  if: steps.check_tag.outputs.exists == 'false' && matrix.python-version == 'python38'
-      #  uses: ncipollo/release-action@v1
-      #  with:
-      #    tag: ${{ steps.get_version.outputs.version }}
-      #    token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tests
+        run: |
+          ${{matrix.python-version}} do.py uhd_test
+      - name: Get package version
+        id: get_version
+        run: |
+          echo "::set-output name=version::v$(${{matrix.python-version}} do.py version)"
+      - name: Check tag for current version
+        uses: mukunku/tag-exists-action@v1.0.0
+        id: check_tag
+        with:
+          tag: ${{ steps.get_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release and publish artifacts
+        if: steps.check_tag.outputs.exists == 'false' && matrix.python-version == 'python38'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.get_version.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}

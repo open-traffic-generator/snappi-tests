@@ -60,13 +60,12 @@ def uhd_test():
     args = [
         '--location="https://10.36.70.75"',
         (
-            '--ports="10.36.70.75;1;1'
-            " 10.36.70.75;1;2"
-            " 10.36.70.75;1;3"
-            ' 10.36.70.75;1;4"'
+            '--ports="localuhd/25 localuhd/26 localuhd/27 localuhd/28"'
         ),
         "--ext=ixnetwork",
+        "--speed=speed_100_gbps"
         "tests",
+        '-m "uhd"'
     ]
     run(
         [

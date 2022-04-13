@@ -1,3 +1,8 @@
+import pytest
+
+@pytest.mark.ixnet
+@pytest.mark.uhd
+
 def test_ip_many_to_many(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.
