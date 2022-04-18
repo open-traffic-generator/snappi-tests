@@ -15,19 +15,18 @@ const (
 )
 
 var (
-	pktCount = 1000
+	pktCount   = 500
 	routeCount = int32(5)
-	srcMAC = "00:00:01:01:01:01"
-	srcIP = "1.1.1.2"
+	srcMAC     = "00:00:01:01:01:01"
+	srcIP      = "1.1.1.2"
 	srcGateway = "1.1.1.1"
-	srcPrefix = 24
-	srcAS = 2222
-	dstMAC = "00:00:02:02:02:02"
-	dstIP = "2.2.2.2"
+	srcPrefix  = 24
+	srcAS      = 2222
+	dstMAC     = "00:00:02:02:02:02"
+	dstIP      = "2.2.2.2"
 	dstGateway = "2.2.2.1"
-	dstPrefix = 24
-	dstAS = 3333
-
+	dstPrefix  = 24
+	dstAS      = 3333
 )
 
 func main() {
@@ -52,14 +51,14 @@ func main() {
 			res, err := api.GetMetrics(mr)
 			checkResponse(res, err)
 
-			bgp1m := res.Bgpv4Metrics().Items()[0]
-			bgp2m := res.Bgpv4Metrics().Items()[1]
-			return bgp1m.SessionState() == "up" && 
-				bgp2m.SessionState() == "up" && 
-				bgp1m.RoutesAdvertised() == routeCount && 
-				bgp2m.RoutesAdvertised() == routeCount && 
-				bgp1m.RoutesReceived() == routeCount && 
-				bgp2m.RoutesReceived() == routeCount
+			bgpv4Peer1 := res.Bgpv4Metrics().Items()[0]
+			bgpv4Peer2 := res.Bgpv4Metrics().Items()[1]
+			return bgpv4Peer1.SessionState() == "up" &&
+				bgpv4Peer2.SessionState() == "up" &&
+				bgpv4Peer1.RoutesAdvertised() == routeCount &&
+				bgpv4Peer2.RoutesAdvertised() == routeCount &&
+				bgpv4Peer1.RoutesReceived() == routeCount &&
+				bgpv4Peer2.RoutesReceived() == routeCount
 		},
 		10*time.Second,
 	)
@@ -178,14 +177,13 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 
 	// create a flow and set the endpoints
 	f1 := config.Flows().Add().SetName("p1.v4.p2")
-
 	f1.TxRx().Device().SetTxNames([]string{p1d1BGPv4PeerRoutes.Name()}).SetRxNames([]string{p2d1BGPv4PeerRoutes.Name()})
 
 	// enable per flow metrics tracking
 	f1.Metrics().SetEnable(true)
 	// set size, count and transmit rate for all packets in the flow
 	f1.Size().SetFixed(512)
-	f1.Rate().SetPps(500)
+	f1.Rate().SetPps(100)
 	f1.Duration().FixedPackets().SetPackets(int32(pktCount))
 
 	// configure headers for all packets in the flow
