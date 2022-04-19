@@ -63,7 +63,7 @@ def uhd_test():
             '--ports="localuhd/25 localuhd/26 localuhd/27 localuhd/28"'
         ),
         "--ext=ixnetwork",
-        "--speed=speed_100_gbps"
+        "--speed=speed_100_gbps",
         "tests",
         '-m "uhd"'
     ]
