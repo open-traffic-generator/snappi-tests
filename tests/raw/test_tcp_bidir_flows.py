@@ -1,6 +1,6 @@
 import pytest
 
-@pytest.mark.ixnet
+#@pytest.mark.ixnet
 @pytest.mark.uhd
 
 def test_tcp_bidir_flows(api, utils):
