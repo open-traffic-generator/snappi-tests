@@ -1,3 +1,9 @@
+import pytest
+
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-ixnetwork/issues/522"
+)
+
 def test_ip_one_to_one(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.

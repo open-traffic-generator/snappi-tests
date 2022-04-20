@@ -44,7 +44,7 @@ def test_ip_v4v6_device_and_raw_capture(api, utils):
 
     cap = config.captures.capture(name="c1")[-1]
     cap.port_names = [rx.name]
-    cap.format = cap.PCAP
+    cap.format = cap.PCAPNG
 
     # Device configuration
     tx_dev, rx_dev = config.devices.device().device()
