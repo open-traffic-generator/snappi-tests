@@ -3,7 +3,6 @@ Test IPv4 Forwarding with
 - Endpoints: OTG 1.1.1.1 -----> 1.1.1.2 DUT 2.2.2.1 ------> OTG 2.2.2.2
 - Static Route on DUT: 20.20.20.0/24 -> 2.2.2.2
 - TCP flow from OTG: 10.10.10.1 -> 20.20.20.1+
-
 To run: go run ipv4_forwarding.go -dstMac=<MAC of 1.1.1.2>
 */
 
@@ -19,7 +18,7 @@ import (
 
 // hostname and interfaces of ixia-c-one node from containerlab topology
 const (
-	otgHost  = "https://clab-ixia-c-ixia-c-one"
+	otgHost  = "https://clab-ixiac01-ixia-c"
 	otgPort1 = "eth1"
 	otgPort2 = "eth2"
 )
@@ -27,7 +26,7 @@ const (
 var (
 	dstMac   = "ff:ff:ff:ff:ff:ff"
 	srcMac   = "00:00:00:00:00:aa"
-	pktCount = 1000
+	pktCount = 100
 )
 
 func main() {
@@ -57,7 +56,7 @@ func main() {
 			fm := res.FlowMetrics().Items()[0]
 			return fm.Transmit() == gosnappi.FlowMetricTransmit.STOPPED && fm.FramesRx() == int64(pktCount)
 		},
-		10*time.Second,
+		20*time.Second,
 	)
 }
 
@@ -95,7 +94,7 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 	f1.Metrics().SetEnable(true)
 	// set size, count and transmit rate for all packets in the flow
 	f1.Size().SetFixed(512)
-	f1.Rate().SetPps(500)
+	f1.Rate().SetPps(10)
 	f1.Duration().FixedPackets().SetPackets(int32(pktCount))
 
 	// configure headers for all packets in the flow
@@ -107,7 +106,7 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 	eth.Dst().SetValue(dstMac)
 
 	ip.Src().SetValue("10.10.10.1")
-	ip.Dst().Increment().SetStart("20.20.20.1").SetStep("0.0.0.1").SetCount(5)
+	ip.Dst().Increment().SetStart("10.20.20.1").SetStep("0.0.0.1").SetCount(5)
 
 	tcp.SrcPort().SetValue(3250)
 	tcp.DstPort().Decrement().SetStart(8070).SetStep(2).SetCount(10)
