@@ -62,7 +62,7 @@ def b2b_raw_config(api):
 
     cap = config.captures.capture(name="c1")[-1]
     cap.port_names = [rx.name]
-    cap.format = cap.PCAP
+    cap.format = cap.PCAPNG
 
     return config
 
