@@ -34,6 +34,8 @@ def get_version():
             version_info = re.findall(r"version: (.+)", out)
             if version_info:
                 version_info = version_info[0]
+        with open("version.txt", "w+") as f:
+            f.close()
         if version_info:
             new_data = []
             with open("requirements.txt") as f:
@@ -54,7 +56,6 @@ def get_version():
                 f.writelines(new_data)
         elif workflow_id:
             print(workflow_id)
-        open("version.txt", "w+")
 
 
 def lint():
