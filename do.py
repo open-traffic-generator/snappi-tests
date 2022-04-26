@@ -56,6 +56,16 @@ def test():
     )
 
 
+def pytest_addoption(parser):
+    # called before running tests to register command line options for pytest
+    parser.addoption("--setup_name", action="store", default=None)
+
+
+def setup_name(request):
+    setup_name = request.config.getoption("--setup_name")
+    return setup_name
+
+
 def uhd_test():
     args = [
         '--location="https://10.36.70.75"',
@@ -65,7 +75,7 @@ def uhd_test():
         "--ext=ixnetwork",
         "--speed=speed_100_gbps",
         "tests",
-        '-m "uhd"'
+        "--setup_name uhd"
     ]
     run(
         [

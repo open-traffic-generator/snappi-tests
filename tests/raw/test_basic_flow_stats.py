@@ -30,7 +30,7 @@ def test_basic_flow_stats(settings):
     # configure capture
     cap = config.captures.capture(name="cap")[-1]
     cap.port_names = [rx.name]
-    cap.format = cap.PCAP
+    cap.format = cap.PCAPNG
     # configure flow properties
     flw = config.flows.flow(name="flw")[-1]
     # flow endpoints

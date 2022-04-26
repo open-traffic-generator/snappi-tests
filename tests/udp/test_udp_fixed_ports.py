@@ -1,3 +1,5 @@
+uhd = 1
+
 def test_udp_fixed_ports(api, b2b_raw_config, utils):
     """
     Configure a raw udp flow with,
@@ -12,7 +14,10 @@ def test_udp_fixed_ports(api, b2b_raw_config, utils):
     api.set_config(api.config())
     f = b2b_raw_config.flows[0]
     packets = 1
-    size = 74
+    if uhd:
+        size = 70
+    else:
+        size = 74
     f.packet.ethernet().ipv4().udp()
     eth, ip, udp = f.packet[0], f.packet[1], f.packet[2]
     eth.src.value = "00:0c:29:1d:10:67"

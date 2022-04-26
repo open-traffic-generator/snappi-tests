@@ -1,3 +1,5 @@
+uhd = 1
+
 def test_udp_header_with_list(api, b2b_raw_config, utils):
     """
     Configure a raw udp flow with,
@@ -12,7 +14,10 @@ def test_udp_header_with_list(api, b2b_raw_config, utils):
     api.set_config(api.config())
     flow = b2b_raw_config.flows[0]
     packets = 100
-    size = 74
+    if uhd:
+        size = 70
+    else:
+        size = 74
     flow.packet.ethernet().ipv4().udp()
     eth, ip, udp = flow.packet[0], flow.packet[1], flow.packet[2]
     eth.src.value = "00:0c:29:1d:10:67"

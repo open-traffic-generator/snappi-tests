@@ -1,8 +1,7 @@
 import pytest
 
-#@pytest.mark.ixnet
-@pytest.mark.uhd
 
+@pytest.mark.uhd
 def test_tcp_unidir_flows(api, utils):
     """
     Configure a raw TCP flow with,
