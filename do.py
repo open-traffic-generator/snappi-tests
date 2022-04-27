@@ -39,6 +39,7 @@ def get_version():
                 )[0]
         with open("version.txt", "w+") as f:
             f.close()
+
         if version_info:
             new_data = []
             with open("requirements.txt") as f:
