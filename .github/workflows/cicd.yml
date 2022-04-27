@@ -22,7 +22,7 @@ jobs:
           echo "${{ steps.release_flag.outputs.workflow_id }}"
           git add version.txt
           git add requirements.txt
-          git commit -m "Updating version.txt file"
+          git commit --allow-empty -m "Updating version.txt file"
           git push
       - name: Install dependencies
         run: |
