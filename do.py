@@ -34,8 +34,12 @@ def get_version():
             version_info = re.findall(r"version: (.+)", out)
             if version_info:
                 version_info = version_info[0]
+                snappi_convergence = re.findall(
+                    r"snappi_convergence: (.+)", out
+                )[0]
         with open("version.txt", "w+") as f:
             f.close()
+
         if version_info:
             new_data = []
             with open("requirements.txt") as f:
@@ -45,8 +49,13 @@ def get_version():
                         r"snappi\[convergence,ixnetwork\]==.*", line
                     )
                     if match:
+                        snappi_convergence = (
+                            "snappi_convergence==" + snappi_convergence + "\n"
+                        )
+                        new_data.append("snappi" + "\n")
+                        new_data.append(snappi_convergence)
                         new_version = (
-                            "snappi[convergence,ixnetwork]==" + version_info
+                            "snappi-ixnetwork==" + version_info + "\n"
                         )
                         new_data.append(new_version)
                     else:

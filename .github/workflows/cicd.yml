@@ -20,6 +20,10 @@ jobs:
         run: |
           echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
           echo "${{ steps.release_flag.outputs.workflow_id }}"
+          git add version.txt
+          git add requirements.txt
+          git commit --allow-empty -m "Updating version.txt file"
+          git push
       - name: Install dependencies
         run: |
           rm -rf .env
