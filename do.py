@@ -74,8 +74,8 @@ def uhd_test():
         ),
         "--ext=ixnetwork",
         "--speed=speed_100_gbps",
-        "tests",
-        "--setup_name uhd"
+        "-- uhd=true"
+        "tests"
     ]
     run(
         [

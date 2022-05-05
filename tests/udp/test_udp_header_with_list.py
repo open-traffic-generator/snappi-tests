@@ -1,5 +1,3 @@
-uhd = 1
-
 def test_udp_header_with_list(api, b2b_raw_config, utils):
     """
     Configure a raw udp flow with,
@@ -14,10 +12,7 @@ def test_udp_header_with_list(api, b2b_raw_config, utils):
     api.set_config(api.config())
     flow = b2b_raw_config.flows[0]
     packets = 100
-    if uhd:
-        size = 70
-    else:
-        size = 74
+    size = 74
     flow.packet.ethernet().ipv4().udp()
     eth, ip, udp = flow.packet[0], flow.packet[1], flow.packet[2]
     eth.src.value = "00:0c:29:1d:10:67"
@@ -65,5 +60,8 @@ def captures_ok(api, cfg, size, utils):
         for packet in cap_dict[k]:
             assert utils.to_hex(packet[34:36]) == hex(src[packet_num])
             assert utils.to_hex(packet[36:38]) == hex(dst[packet_num])
-            assert len(packet) == size
+            if utils.settings.uhd:
+                assert len(packet) == size - 4
+            else:
+                assert len(packet) == size
             packet_num = (packet_num + 1) % 2

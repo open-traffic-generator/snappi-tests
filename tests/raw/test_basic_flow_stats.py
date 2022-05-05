@@ -1,7 +1,7 @@
 import snappi
 
 
-def test_basic_flow_stats(settings):
+def test_basic_flow_stats(utils, settings):
     """
     Configure a raw TCP flow with,
     - tx port as source to rx port as destination
@@ -58,10 +58,11 @@ def test_basic_flow_stats(settings):
     req = api.metrics_request()
     req.flow.flow_names = [flw.name]
     # wait for flow metrics to be as expected
-    while True:
-        res = api.get_metrics(req)
-        if all([1000 == m.frames_rx for m in res.flow_metrics]):
-            break
+    assert wait_for(lambda: metrics_ok(api, req)), "Metrics validation failed!"
+    #while True:
+    #    res = api.get_metrics(req)
+    #    if all([1000 == m.frames_rx for m in res.flow_metrics]):
+    #        break
     # get capture
     cr = api.capture_request()
     cr.port_name = rx.name
@@ -69,3 +70,27 @@ def test_basic_flow_stats(settings):
     # generate pcap in pwd
     with open("out.pcap", "wb") as out:
         out.write(pcap_bytes.read())
+
+
+def metrics_ok(api, req):
+    res = api.get_metrics(req)
+    if all([1000 == m.frames_rx for m in res.flow_metrics]):
+        return
+
+
+def wait_for(func, timeout=15, interval=0.2):
+    """
+    Keeps calling the `func` until it returns true or `timeout` occurs
+    every `interval` seconds.
+    """
+    import time
+
+    start = time.time()
+
+    while time.time() - start <= timeout:
+        if func():
+            return True
+        time.sleep(interval)
+
+    print("Timeout occurred !")
+    return False

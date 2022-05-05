@@ -1,5 +1,3 @@
-uhd = 1
-
 def test_ip_device_and_flow(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.
@@ -125,29 +123,22 @@ def captures_ok(api, cfg, utils, count, packets):
     dst_port = [[0x07, 0xD0 + i] for i in range(count)]
 
     cap_dict = utils.get_all_captures(api, cfg)
-    import pdb; pdb.set_trace()
     assert len(cap_dict) == 1
     sizes = [128, 256]
     size_dt = {128: [0 for i in range(count)], 256: [0 for i in range(count)]}
-    uhd_sizes = [124, 252]
-    if uhd:
-        size_dt = {124: [0 for i in range(count)], 252: [0 for i in range(count)]}
+    if utils.settings.uhd:
+        uhd_sizes = [124, 252]
 
     for b in cap_dict[list(cap_dict.keys())[0]]:
         i = dst_mac.index(b[0:6])
         assert b[0:6] == dst_mac[i] and b[6:12] == src_mac[i]
         assert b[26:30] == src_ip[i] and b[30:34] == dst_ip[i]
-        if uhd:
+        if utils.settings.uhd:
             assert len(b) in uhd_sizes
         else:
             assert len(b) in sizes
         size_dt[len(b)][i] += 1
-        if len(b) == 256:
+        if len(b) == 256 or len(b) == 252:
             assert b[34:36] == src_port[i] and b[36:38] == dst_port[i]
-        if uhd and len(b) == 252:
-            import pdb; pdb.set_trace()
-            assert b[34:36] == src_port[i] and b[36:38] == dst_port[i]
-    import pdb; pdb.set_trace()
-    if uhd:
-        assert sum(size_dt[124]) <= 5000
-    #assert sum(size_dt[128]) + sum(size_dt[256]) == packets
+    if not utils.settings.uhd:
+        assert sum(size_dt[128]) + sum(size_dt[256]) == packets
