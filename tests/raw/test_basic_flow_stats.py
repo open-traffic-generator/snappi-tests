@@ -68,7 +68,7 @@ def test_basic_flow_stats(utils, settings):
     cr.port_name = rx.name
     pcap_bytes = api.get_capture(cr)
     # generate pcap in pwd
-    with open("out.pcap", "wb") as out:
+    with open("out.pcapng", "wb") as out:
         out.write(pcap_bytes.read())
 
 

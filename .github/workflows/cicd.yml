@@ -15,11 +15,28 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
+      - name: Check release is created on snappi-ixnetwork
+        id: release_flag
+        run: |
+          echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
+          echo "${{ steps.release_flag.outputs.workflow_id }}"
+          git add version.txt
+          git add requirements.txt
+          git commit --allow-empty -m "Updating version.txt file"
+          git push
       - name: Install dependencies
         run: |
           rm -rf .env
           ${{matrix.python-version}} do.py setup
           ${{matrix.python-version}} do.py init
+      - name: Download artifacts if release is not created on snappi-ixnetwork
+        if: ${{ steps.release_flag.outputs.workflow_id }}
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ steps.release_flag.outputs.workflow_id }}
+          repo: open-traffic-generator/snappi-ixnetwork
+          workflow_conclusion: success
+          path: ./
       - name: Run tests
         run: |
           ${{matrix.python-version}} do.py test
