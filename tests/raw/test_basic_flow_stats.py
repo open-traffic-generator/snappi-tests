@@ -75,7 +75,7 @@ def test_basic_flow_stats(utils, settings):
 def metrics_ok(api, req):
     res = api.get_metrics(req)
     if all([1000 == m.frames_rx for m in res.flow_metrics]):
-        return
+        return True
 
 
 def wait_for(func, timeout=15, interval=0.2):
