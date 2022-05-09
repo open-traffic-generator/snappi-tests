@@ -1,6 +1,6 @@
 import pytest
 
-
+@pytest.mark.non_uhd
 def test_vxlanv6_b2b_scale(api, utils):
     """
     1. Create 128 loopbacks and advertise them using BGP.

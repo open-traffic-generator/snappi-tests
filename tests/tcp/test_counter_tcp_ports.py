@@ -1,3 +1,9 @@
+import pytest
+
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-tests/issues/39"
+)
+
 def test_counter_tcp_ports(api, utils, b2b_raw_config):
     """
     Configure a raw TCP flow with,

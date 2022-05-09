@@ -1,7 +1,3 @@
-import pytest
-
-
-@pytest.mark.uhd
 def test_tcp_unidir_flows(api, utils):
     """
     Configure a raw TCP flow with,

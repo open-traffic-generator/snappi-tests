@@ -1,5 +1,9 @@
 import snappi
+import pytest
 
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-tests/issues/40"
+)
 
 def test_basic_flow_stats(utils, settings):
     """

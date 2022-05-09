@@ -1,5 +1,8 @@
-uhd = 1
+import pytest
 
+@pytest.mark.skip(
+    reason="https://github.com/open-traffic-generator/snappi-tests/issues/39"
+)
 
 def test_udp_fixed_ports(api, b2b_raw_config, utils):
     """
