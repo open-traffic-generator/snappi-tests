@@ -1,8 +1,3 @@
-import pytest
-
-@pytest.mark.skip(
-    reason="https://github.com/open-traffic-generator/snappi-tests/issues/39"
-)
 def test_ip_device_and_flow(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.
@@ -133,7 +128,6 @@ def captures_ok(api, cfg, utils, count, packets):
     size_dt = {128: [0 for i in range(count)], 256: [0 for i in range(count)]}
     if utils.settings.uhd:
         uhd_sizes = [124, 252]
-
     for b in cap_dict[list(cap_dict.keys())[0]]:
         i = dst_mac.index(b[0:6])
         assert b[0:6] == dst_mac[i] and b[6:12] == src_mac[i]
@@ -142,7 +136,7 @@ def captures_ok(api, cfg, utils, count, packets):
             assert len(b) in uhd_sizes
         else:
             assert len(b) in sizes
-        size_dt[len(b)][i] += 1
+            size_dt[len(b)][i] += 1
         if len(b) == 256 or len(b) == 252:
             assert b[34:36] == src_port[i] and b[36:38] == dst_port[i]
     if not utils.settings.uhd:

@@ -20,7 +20,6 @@ jobs:
         run: |
           echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
           echo "${{ steps.release_flag.outputs.workflow_id }}"
-          git add version.txt
           git add requirements.txt
           git commit --allow-empty -m "Updating version.txt file"
           git push
@@ -57,3 +56,9 @@ jobs:
         with:
           tag: ${{ steps.get_version.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Clear version.txt file
+        run: |
+          ${{matrix.python-version}} do.py clear_version_file
+          git add version.txt
+          git commit --allow-empty -m "Clearing version.txt file"
+          git push

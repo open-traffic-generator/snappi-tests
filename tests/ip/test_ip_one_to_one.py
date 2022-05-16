@@ -1,9 +1,3 @@
-import pytest
-
-@pytest.mark.skip(
-    reason="https://github.com/open-traffic-generator/snappi-tests/issues/39"
-)
-
 def test_ip_one_to_one(api, b2b_raw_config, utils):
     """
     Configure the devices on Tx and Rx Port.
@@ -144,7 +138,7 @@ def captures_ok(api, cfg, utils, count, packets):
             assert len(b) in uhd_sizes
         else:
             assert len(b) in sizes
-        size_dt[len(b)][i] += 1
+            size_dt[len(b)][i] += 1
         if len(b) == 256 or len(b) == 252:
             assert b[34:36] == src_port[i] and b[36:38] == dst_port[i]
     if not utils.settings.uhd:
