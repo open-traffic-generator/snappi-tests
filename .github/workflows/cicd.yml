@@ -62,3 +62,4 @@ jobs:
           git add version.txt
           git commit --allow-empty -m "Clearing version.txt file"
           git push
+
