@@ -27,6 +27,7 @@ jobs:
               git push
             else
               echo "No change in requirement file"
+          fi
       - name: Install dependencies
         run: |
           rm -rf .env
@@ -50,6 +51,7 @@ jobs:
           git push
             else
               echo "No change in version file"
+          fi
       - name: Run tests
         run: |
           ${{matrix.python-version}} do.py test
