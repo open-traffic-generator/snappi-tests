@@ -37,8 +37,6 @@ def get_version():
                 snappi_convergence = re.findall(
                     r"snappi_convergence: (.+)", out
                 )[0]
-        with open("version.txt", "w+") as f:
-            f.close()
 
         if version_info:
             new_data = []
@@ -67,6 +65,11 @@ def get_version():
             print(workflow_id)
 
 
+def clear_version_file():
+    with open("version.txt", "w+") as f:
+        f.close()
+
+
 def lint():
     paths = ["tests", "do.py"]
 
@@ -91,6 +94,25 @@ def test():
         "--speed=speed_100_gbps",
         "tests",
         '-m "not dut and not l1_manual"',
+    ]
+    run(
+        [
+            py() + " -m pytest -svvv {}".format(" ".join(args)),
+        ]
+    )
+
+
+def uhd_test():
+    args = [
+        '--location="https://10.36.70.75"',
+        (
+            '--ports="localuhd/25 localuhd/26 localuhd/27 localuhd/28"'
+        ),
+        "--ext=ixnetwork",
+        "--speed=speed_100_gbps",
+        "--uhd=true",
+        "tests",
+        '-m "not dut and not l1_manual and not non_uhd"'
     ]
     run(
         [

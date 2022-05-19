@@ -1,6 +1,6 @@
 import pytest
 
-
+@pytest.mark.non_uhd
 @pytest.mark.l1_manual
 @pytest.mark.parametrize(
     "speed",

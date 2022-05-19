@@ -13,5 +13,6 @@
     "log_level": "info",
     "dynamic_stats_output": false,
     "license_servers": [],
-    "promiscuous": true
+    "promiscuous": true,
+    "uhd": false
 }

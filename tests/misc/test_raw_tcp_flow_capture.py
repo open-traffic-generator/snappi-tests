@@ -47,7 +47,7 @@ def test_raw_tcp_flow_capture(api, utils):
 
     cap = config.captures.capture(name="c1")[-1]
     cap.port_names = [rx.name]
-    cap.format = cap.PCAP
+    cap.format = cap.PCAPNG
 
     # Flows configuration
     f1, f2 = config.flows.flow(name="FlowIpv4Raw").flow(name="FlowIpv6Raw")

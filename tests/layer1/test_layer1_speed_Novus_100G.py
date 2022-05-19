@@ -1,3 +1,6 @@
+import pytest
+
+@pytest.mark.non_uhd
 def test_layer1(api, utils):
     """Test that layer1 configuration settings are being applied correctly
     A user should be able to configure ports with/without locations.

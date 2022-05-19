@@ -1,10 +1,10 @@
-name: cicd
+name: uhd_cicd
 
 on: [push]
 
 jobs:
-  cicd:
-    runs-on: [self-hosted, Linux, x64, Ubuntu]
+  uhd_cicd:
+    runs-on: [self-hosted, Linux, x64, uhd]
     strategy:
       max-parallel: 1
       matrix:
@@ -20,14 +20,6 @@ jobs:
         run: |
           echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
           echo "${{ steps.release_flag.outputs.workflow_id }}"
-          git add requirements.txt
-          if git status --porcelain | grep .
-            then
-              git commit --allow-empty -m "Updating file"
-              git push
-            else
-              echo "No change in requirement file"
-          fi
       - name: Install dependencies
         run: |
           rm -rf .env
@@ -41,20 +33,9 @@ jobs:
           repo: open-traffic-generator/snappi-ixnetwork
           workflow_conclusion: success
           path: ./
-      - name: Clear version.txt file
-        run: |
-          ${{matrix.python-version}} do.py clear_version_file
-          git add version.txt
-          if git status --porcelain | grep .
-            then
-              git commit --allow-empty -m "Clearing version.txt file"
-          git push
-            else
-              echo "No change in version file"
-          fi
       - name: Run tests
         run: |
-          ${{matrix.python-version}} do.py test
+          ${{matrix.python-version}} do.py uhd_test
       - name: Get package version
         id: get_version
         run: |
@@ -72,4 +53,3 @@ jobs:
         with:
           tag: ${{ steps.get_version.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
-

@@ -66,6 +66,9 @@ def captures_ok(api, cfg, size, utils):
         for packet in cap_dict[k]:
             assert utils.to_hex(packet[34:36]) == hex(src[i])
             assert utils.to_hex(packet[36:38]) == hex(dst[i])
-            assert len(packet) == size
+            if utils.settings.uhd:
+                assert len(packet) == size - 4
+            else:
+                assert len(packet) == size
             i = (i + 1) % 10
             j = (j + 1) % 2

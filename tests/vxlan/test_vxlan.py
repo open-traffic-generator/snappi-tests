@@ -1,6 +1,6 @@
 import pytest
 
-
+@pytest.mark.non_uhd
 def test_vxlan(api, utils):
     config = api.config()
 

@@ -86,4 +86,7 @@ def captures_ok(api, cfg, size, utils):
         for b in cap_dict[k]:
             assert b[34:36] == src[i] and b[36:38] == dst[i]
             i = (i + 1) % 10
-            assert len(b) == size
+            if utils.settings.uhd:
+                assert len(b) == size - 4
+            else:
+                assert len(b) == size
