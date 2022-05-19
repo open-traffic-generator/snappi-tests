@@ -21,8 +21,12 @@ jobs:
           echo "::set-output name=workflow_id::$(${{matrix.python-version}} do.py get_version)"
           echo "${{ steps.release_flag.outputs.workflow_id }}"
           git add requirements.txt
-          git commit --allow-empty -m "Updating version.txt file"
-          git push
+          if git status --porcelain | grep .
+            then
+              git commit --allow-empty -m "Updating file"
+              git push
+            else
+              echo "No change in requirement file"
       - name: Install dependencies
         run: |
           rm -rf .env
@@ -36,6 +40,16 @@ jobs:
           repo: open-traffic-generator/snappi-ixnetwork
           workflow_conclusion: success
           path: ./
+      - name: Clear version.txt file
+        run: |
+          ${{matrix.python-version}} do.py clear_version_file
+          git add version.txt
+          if git status --porcelain | grep .
+            then
+              git commit --allow-empty -m "Clearing version.txt file"
+          git push
+            else
+              echo "No change in version file"
       - name: Run tests
         run: |
           ${{matrix.python-version}} do.py test
@@ -56,10 +70,4 @@ jobs:
         with:
           tag: ${{ steps.get_version.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Clear version.txt file
-        run: |
-          ${{matrix.python-version}} do.py clear_version_file
-          git add version.txt
-          git commit --allow-empty -m "Clearing version.txt file"
-          git push
 

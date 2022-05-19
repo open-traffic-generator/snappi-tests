@@ -1,9 +1,9 @@
-name: cicd
+name: uhd_cicd
 
 on: [push]
 
 jobs:
-  cicd:
+  uhd_cicd:
     runs-on: [self-hosted, Linux, x64, uhd]
     strategy:
       max-parallel: 1
