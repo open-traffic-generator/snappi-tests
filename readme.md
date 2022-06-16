@@ -20,7 +20,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
 
   ```sh
   # if no extensions are needed - e.g. for ixia-c testbed
-  python -m pip install --upgrade snappi==0.7.37
+  python -m pip install --upgrade snappi==0.7.41
   # install with ixnetwork extension - for ixnetwork testbed
   python -m pip install --upgrade "snappi[ixnetwork]==0.5.13"
   ```
