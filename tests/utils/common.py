@@ -146,10 +146,11 @@ def start_traffic(api, cfg, start_capture=True):
         cs.state = cs.START
         check_warnings(api.set_capture_state(cs))
 
-    print("Starting all protocols ...")
-    ps = api.protocol_state()
-    ps.state = ps.START
-    api.set_protocol_state(ps)
+    if len(cfg.devices) > 0 or len(cfg.lags) > 0:
+        print("Starting all protocols ...")
+        ps = api.protocol_state()
+        ps.state = ps.START
+        api.set_protocol_state(ps)
 
     print("Starting transmit on all flows ...")
     ts = api.transmit_state()
