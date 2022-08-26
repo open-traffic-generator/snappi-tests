@@ -1,2 +1,0 @@
-version: 0.9.1
-snappi_convergence: 0.4.1
