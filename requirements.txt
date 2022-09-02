@@ -4,4 +4,4 @@ flake8
 dpkt==1.9.4
 snappi
 snappi_convergence==0.2.3
-snappi-ixnetwork==0.7.12
+snappi-ixnetwork==0.9.1
