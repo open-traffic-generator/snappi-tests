@@ -18,7 +18,7 @@ import (
 
 // hostname and interfaces of ixia-c-one node from containerlab topology
 const (
-	otgHost  = "https://clab-ixiac01-ixia-c"
+	otgHost  = "https://clab-ixiac01-ixia-c:8443"
 	otgPort1 = "eth1"
 	otgPort2 = "eth2"
 )
