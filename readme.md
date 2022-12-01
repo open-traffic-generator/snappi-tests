@@ -37,7 +37,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
   # sample for ixia-c testbed
   {
     # controller address
-    "location": "https://localhost",
+    "location": "https://localhost:8443",
     "ports": [
         # traffic engine addresses 
         "localhost:5555",
