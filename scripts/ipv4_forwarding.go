@@ -26,7 +26,7 @@ const (
 var (
 	dstMac   = "ff:ff:ff:ff:ff:ff"
 	srcMac   = "00:00:00:00:00:aa"
-	pktCount = 100
+	pktCount = 10
 )
 
 func main() {
@@ -94,7 +94,7 @@ func newConfig() (gosnappi.GosnappiApi, gosnappi.Config) {
 	f1.Metrics().SetEnable(true)
 	// set size, count and transmit rate for all packets in the flow
 	f1.Size().SetFixed(512)
-	f1.Rate().SetPps(10)
+	f1.Rate().SetPps(5)
 	f1.Duration().FixedPackets().SetPackets(int32(pktCount))
 
 	// configure headers for all packets in the flow
