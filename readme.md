@@ -20,7 +20,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
 
   ```sh
   # if no extensions are needed - e.g. for ixia-c testbed
-  python -m pip install --upgrade snappi==0.9.4
+  python -m pip install --upgrade snappi==0.9.8
   # install with ixnetwork extension - for ixnetwork testbed
   python -m pip install --upgrade "snappi[ixnetwork]==0.9.1"
   ```
@@ -51,7 +51,7 @@ Please make sure that the client setup meets [Python Prerequisites](#python-prer
   # sample for ixnetwork testbed
   {
     # IxNetwork API Server address
-    "location": "https://192.168.1.1:443",
+    "location": "https://192.168.1.1:8443",
     "ports": [
         # chassis;card;port
         "192.168.2.1;6;1",

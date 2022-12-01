@@ -17,7 +17,7 @@ def udp_bidirectional_flow():
     #   location = "https://<tgen-ip>:<port>", ext="ixnetwork"
     # trex
     #   location = "<tgen-ip>:<port>", ext="trex"
-    api = snappi.api(location="https://localhost:443", verify=False, ext=None)
+    api = snappi.api(location="https://localhost:8443", verify=False, ext=None)
     # and an empty traffic configuration to be pushed to controller later on
     cfg = api.config()
 

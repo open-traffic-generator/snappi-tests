@@ -16,7 +16,7 @@ def Traffic_Test():
     # TRex:         location =         "<tgen-ip>:<port>", ext="trex"
 
     print("")
-    api = snappi.api(location="https://10.39.71.203:443", verify=False)
+    api = snappi.api(location="https://10.39.71.203:8443", verify=False)
     print("%s Starting connection to controller                     ... " % datetime.now())
 
     # Create an empty configuration to be pushed to controller

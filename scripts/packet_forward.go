@@ -23,7 +23,7 @@ func main() {
 	api := gosnappi.NewApi()
 	if httpTransport := false; httpTransport {
 		log.Println("Using HTTP transport ...")
-		api.NewHttpTransport().SetLocation("https://ixia-c-service:443")
+		api.NewHttpTransport().SetLocation("https://ixia-c-service:8443")
 	} else {
 		log.Println("Using gRPC transport ...")
 		api.NewGrpcTransport().SetLocation("grpc-service.ixia-c:40051")
