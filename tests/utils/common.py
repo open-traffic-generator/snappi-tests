@@ -142,20 +142,21 @@ def start_traffic(api, cfg, start_capture=True):
     capture_names = get_capture_port_names(cfg)
     if capture_names and start_capture:
         print("Starting capture on ports %s ..." % str(capture_names))
-        cs = api.capture_state()
-        cs.state = cs.START
-        check_warnings(api.set_capture_state(cs))
+        cs = api.control_state()
+        cs.port.capture.state = cs.port.capture.START
+        cs.port.capture.port_names = capture_names
+        check_warnings(api.set_control_state(cs))
 
     if len(cfg.devices) > 0 or len(cfg.lags) > 0:
         print("Starting all protocols ...")
-        ps = api.protocol_state()
-        ps.state = ps.START
-        api.set_protocol_state(ps)
+        ps = api.control_state()
+        ps.protocol.all.state = ps.protocol.all.START  # noqa
+        api.set_control_state(ps)
 
     print("Starting transmit on all flows ...")
-    ts = api.transmit_state()
-    ts.state = ts.START
-    api.set_transmit_state(ts)
+    ts = api.control_state()
+    ts.traffic.flow_transmit.state = ts.traffic.flow_transmit.START  # noqa
+    api.set_control_state(ts)
 
 
 def stop_traffic(api, cfg=None, stop_capture=True):
@@ -163,17 +164,18 @@ def stop_traffic(api, cfg=None, stop_capture=True):
     Stops flows
     """
     print("Stopping transmit on all flows ...")
-    ts = api.transmit_state()
-    ts.state = ts.STOP
-    check_warnings(api.set_transmit_state(ts))
+    ts = api.control_state()
+    ts.traffic.flow_transmit.state = ts.traffic.flow_transmit.STOP  # noqa
+    check_warnings(api.set_control_state(ts))
     if cfg is None:
         return
     capture_names = get_capture_port_names(cfg)
     if capture_names and stop_capture:
         print("Stopping capture on ports %s ..." % str(capture_names))
-        cs = api.capture_state()
-        cs.state = cs.STOP
-        check_warnings(api.set_capture_state(cs))
+        cs = api.control_state()
+        cs.port.capture.state = cs.port.capture.STOP
+        cs.port.capture.port_names = capture_names
+        check_warnings(api.set_control_state(cs))
 
 
 def seconds_elapsed(start_seconds):
